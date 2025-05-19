@@ -64,8 +64,6 @@ export default function QRDisplayScreen() {
         bcid: bcidForBwipJs,
         text: currentData,
         scale: PixelRatio.get(),
-        // width: is1D ? 50 : 50, // Wider for 1D codes
-        // height: is1D ? 15 : 50, // Shorter for 1D codes
         includetext: true,
         textxalign: 'center' as 'center',
         barcolor: '000000',
@@ -109,7 +107,7 @@ export default function QRDisplayScreen() {
       <Stack.Screen />
       <View style={styles.header}>
         <Pressable onPress={handleSavePassAndGoHome}>
-          <MaterialIcons name="arrow-back-ios" size={24} color="white" />
+          <MaterialIcons name="arrow-back-ios" size={28} color="white" />
         </Pressable>
         <StyledText
           style={styles.headerTitle}
@@ -122,7 +120,7 @@ export default function QRDisplayScreen() {
             <MaterialIcons name="delete" size={28} color="white" />
           </Pressable>
         ) : (
-          <View style={{ width: 28 }} />
+          <View style={{ width: 32 }} />
         )}
       </View>
 
@@ -147,17 +145,18 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    paddingHorizontal: 20,
-    paddingVertical: 20,
+    paddingHorizontal: 21,
+    paddingVertical: 10,
     backgroundColor: "black",
   },
   headerTitle: {
     color: "white",
-    fontSize: 24,
+    fontSize: 20,
     fontFamily: "AkkuratLL-Regular",
     maxWidth: "70%",
     textAlign: "left",
     overflow: "hidden",
+    paddingBottom: 5,
   },
   contentContainer: {
     flex: 1,

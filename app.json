@@ -9,7 +9,8 @@
     "newArchEnabled": true,
     "android": {
       "backgroundColor": "#000000",
-      "edgeToEdgeEnabled": true
+      "edgeToEdgeEnabled": true,
+      "package": "com.vandamd.passes"
     },
     "androidNavigationBar": {
       "visible": "immersive",
@@ -21,6 +22,12 @@
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "f0513931-307a-42e4-856f-fc0a10e9c922"
+      }
     }
   }
 }

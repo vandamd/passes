@@ -46,6 +46,7 @@ export default function NamePassScreen() {
             autoFocus
             cursorColor="white"
             selectionColor="white"
+            onSubmitEditing={handleNext}
           />
         </View>
       </View>
@@ -62,12 +63,14 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    paddingHorizontal: 20,
-    paddingVertical: 20,
+    paddingHorizontal: 21,
+    paddingVertical: 10,
   },
   title: {
-    fontSize: 24,
+    color: "white",
+    fontSize: 20,
     fontFamily: "AkkuratLL-Regular",
+    paddingBottom: 5,
   },
   content: {
     flex: 1,

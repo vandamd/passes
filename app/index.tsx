@@ -54,7 +54,7 @@ export default function Index() {
           <View style={styles.bottomNav}>
             <Link href="/add/name" asChild>
               <Pressable>
-                <MaterialIcons name="add-circle-outline" size={35} color="white" />
+                <MaterialIcons name="add-circle-outline" size={40} color="white" />
               </Pressable>
             </Link>
           </View>
@@ -85,24 +85,24 @@ const styles = StyleSheet.create({
   },
   list: {
     flex: 1,
-    paddingTop: 10,
+    paddingTop: 36,
   },
   passItem: {
     paddingVertical: 10,
-    paddingHorizontal: 20,
+    paddingHorizontal: 34,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
   },
   passName: {
-    fontSize: 24,
+    fontSize: 30,
     color: "white",
   },
   bottomNav: {
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
-    paddingVertical: 20,
+    paddingVertical: 11,
     paddingHorizontal: 20,
   },
 });
