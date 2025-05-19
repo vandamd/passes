@@ -1,5 +1,7 @@
 # Passes
 
+![Home Screen](assets/images/example.png)
+
 An app for the Light Phone III to store codes.
 
 Supported codes:
