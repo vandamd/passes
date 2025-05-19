@@ -42,7 +42,7 @@ export default function CameraScreen() {
       <Stack.Screen />
         <View style={styles.header}>
           <Pressable onPress={() => router.canGoBack() ? router.back() : router.replace("/")}>
-            <MaterialIcons name="arrow-back-ios" size={24} color="white" />
+            <MaterialIcons name="arrow-back-ios" size={28} color="white" />
           </Pressable>
           <Pressable onPress={handleSwapCamera}>
             <MaterialIcons name="flip-camera-ios" size={28} color="white" />
@@ -68,8 +68,8 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    paddingHorizontal: 20,
-    paddingVertical: 20,
+    paddingHorizontal: 21,
+    paddingVertical: 10,
     backgroundColor: "black",
     zIndex: 1,
   },

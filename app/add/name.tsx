@@ -25,7 +25,7 @@ export default function NamePassScreen() {
       <View style={styles.container}>
         <View style={styles.header}>
           <Pressable onPress={() => router.canGoBack() ? router.back() : router.replace("/")}>
-            <MaterialIcons name="arrow-back-ios" size={24} color="white" />
+            <MaterialIcons name="arrow-back-ios" size={28} color="white" />
           </Pressable>
           <StyledText style={styles.title}>Name Pass</StyledText>
           {passName.length > 0 && (
@@ -33,7 +33,7 @@ export default function NamePassScreen() {
               <MaterialIcons name="check" size={28} color="white" />
             </Pressable>
           )}
-          {passName.length === 0 && <View style={{ width: 28 }} />}
+          {passName.length === 0 && <View style={{ width: 32 }} />}
         </View>
 
         <View style={styles.content}>
