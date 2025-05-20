@@ -1,17 +1,17 @@
-import React from 'react';
-import { Text as DefaultText, TextProps, StyleSheet } from 'react-native';
+import React from "react";
+import { Text as DefaultText, TextProps, StyleSheet } from "react-native";
 
 interface StyledTextProps extends TextProps {
-  children: React.ReactNode;
+	children: React.ReactNode;
 }
 
 export function StyledText({ style, ...rest }: StyledTextProps) {
-  return <DefaultText style={[styles.text, style]} {...rest} />;
+	return <DefaultText style={[styles.text, style]} {...rest} />;
 }
 
 const styles = StyleSheet.create({
-  text: {
-    fontFamily: 'AkkuratLL-Regular',
-    color: 'white',
-  },
+	text: {
+		fontFamily: "AkkuratLL-Regular",
+		color: "white",
+	},
 });
