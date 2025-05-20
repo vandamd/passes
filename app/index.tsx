@@ -1,10 +1,11 @@
 import React from "react";
-import { View, Pressable, FlatList, StyleSheet } from "react-native";
+import { View, FlatList, StyleSheet } from "react-native";
 import { Stack, Link, useRouter } from "expo-router";
 import { useFonts } from "expo-font";
 import { MaterialIcons } from "@expo/vector-icons";
 import { StyledText } from "../components/StyledText";
 import { usePasses, Pass } from "../contexts/PassesContext";
+import { HapticPressable } from "../components/HapticPressable";
 
 export default function Index() {
 	const [fontsLoaded, fontError] = useFonts({
@@ -18,7 +19,7 @@ export default function Index() {
 	}
 
 	const renderPassItem = ({ item }: { item: Pass }) => (
-		<Pressable
+		<HapticPressable
 			style={styles.passItem}
 			onPress={() =>
 				router.push({
@@ -32,7 +33,7 @@ export default function Index() {
 			}
 		>
 			<StyledText style={styles.passName}>{item.name}</StyledText>
-		</Pressable>
+		</HapticPressable>
 	);
 
 	return (
@@ -59,13 +60,13 @@ export default function Index() {
 				)}
 				<View style={styles.bottomNav}>
 					<Link href="/add/name" asChild>
-						<Pressable>
+						<HapticPressable>
 							<MaterialIcons
 								name="add-circle-outline"
 								size={40}
 								color="white"
 							/>
-						</Pressable>
+						</HapticPressable>
 					</Link>
 				</View>
 			</View>

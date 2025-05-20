@@ -1,8 +1,9 @@
 import React from "react";
 import { MaterialIcons } from "@expo/vector-icons";
-import { StyleSheet, View, Pressable } from "react-native";
+import { StyleSheet, View } from "react-native";
 import { router } from "expo-router";
 import { StyledText } from "./StyledText";
+import { HapticPressable } from "./HapticPressable";
 
 interface HeaderProps {
 	iconName?: keyof typeof MaterialIcons.glyphMap;
@@ -31,14 +32,14 @@ export function Header({
 
 	return (
 		<View style={styles.header}>
-			<Pressable onPress={handleBack}>
+			<HapticPressable onPress={handleBack}>
 				<MaterialIcons name="arrow-back-ios" size={28} color="white" />
-			</Pressable>
+			</HapticPressable>
 			<StyledText style={styles.title}>{headerTitle}</StyledText>
 			{iconShowLength > 0 && iconName ? (
-				<Pressable onPress={onIconPress}>
+				<HapticPressable onPress={onIconPress}>
 					<MaterialIcons name={iconName} size={28} color="white" />
-				</Pressable>
+				</HapticPressable>
 			) : (
 				<View style={{ width: 32 }} />
 			)}
@@ -51,7 +52,7 @@ const styles = StyleSheet.create({
 		flexDirection: "row",
 		alignItems: "center",
 		justifyContent: "space-between",
-		paddingHorizontal: 21,
+		paddingHorizontal: 22,
 		paddingVertical: 10,
 		backgroundColor: "black",
 		zIndex: 1,

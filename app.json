@@ -5,7 +5,6 @@
 		"version": "1.0.0",
 		"orientation": "portrait",
 		"scheme": "passes",
-		"userInterfaceStyle": "automatic",
 		"newArchEnabled": true,
 		"android": {
 			"backgroundColor": "#000000",
