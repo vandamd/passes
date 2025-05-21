@@ -11,7 +11,7 @@ export function StyledText({ style, ...rest }: StyledTextProps) {
 
 const styles = StyleSheet.create({
 	text: {
-		fontFamily: "AkkuratLL-Regular",
+		fontFamily: "PublicSans-Regular",
 		color: "white",
 	},
 });

@@ -63,7 +63,7 @@ const styles = StyleSheet.create({
 		borderBottomColor: "white",
 		color: "white",
 		fontSize: 24,
-		fontFamily: "AkkuratLL-Regular",
+		fontFamily: "PublicSans-Regular",
 		paddingVertical: 2,
 		textAlign: "left",
 	},

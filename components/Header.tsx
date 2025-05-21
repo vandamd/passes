@@ -60,7 +60,7 @@ const styles = StyleSheet.create({
 	title: {
 		color: "white",
 		fontSize: 20,
-		fontFamily: "AkkuratLL-Regular",
+		fontFamily: "PublicSans-Regular",
 		paddingBottom: 5,
 	},
 });

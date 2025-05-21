@@ -9,7 +9,7 @@ import { HapticPressable } from "../components/HapticPressable";
 
 export default function Index() {
 	const [fontsLoaded, fontError] = useFonts({
-		"AkkuratLL-Regular": require("../assets/fonts/AkkuratLL-Regular.otf"),
+		"PublicSans-Regular": require("../assets/fonts/PublicSans-Regular.ttf"),
 	});
 	const { passes } = usePasses();
 	const router = useRouter();
