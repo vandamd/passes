@@ -78,6 +78,7 @@ const styles = StyleSheet.create({
 	outerContainer: {
 		flex: 1,
 		backgroundColor: "black",
+		paddingTop: 36,
 	},
 	emptyContainer: {
 		flex: 1,
@@ -96,7 +97,7 @@ const styles = StyleSheet.create({
 	},
 	list: {
 		flex: 1,
-		paddingVertical: 36,
+		// paddingVertical: 36,
 	},
 	passItem: {
 		paddingVertical: 10,
