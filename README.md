@@ -26,3 +26,5 @@ Font: [Public Sans](https://public-sans.digital.gov/)
 1. Grab the .apk file from [latest release](https://github.com/vandamd/passes/releases/latest).
 2. Install the apk how you like! I prefer via adb, e.g. `adb install passesv1.8.apk`.
 3. Profit!
+
+Note: Developer mode needs to be enabled on the Light Phone III to install third-party apps.
