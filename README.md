@@ -21,3 +21,9 @@ Supported codes:
 -   [x] UPC-A
 
 Font: [Public Sans](https://public-sans.digital.gov/)
+
+## Installation
+
+1. Grab the .apk file from [latest release](https://github.com/vandamd/passes/releases/latest).
+2. Install the apk how you like! I prefer via adb, e.g. `adb install passesv1.8.apk`.
+3. Profit!
