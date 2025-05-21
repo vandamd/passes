@@ -58,17 +58,17 @@ export default function Index() {
 						overScrollMode={"never"}
 					/>
 				)}
-				<View style={styles.bottomNav}>
-					<Link href="/add/name" asChild>
-						<HapticPressable>
-							<MaterialIcons
-								name="add-circle-outline"
-								size={40}
-								color="white"
-							/>
-						</HapticPressable>
-					</Link>
-				</View>
+			</View>
+			<View style={styles.bottomNav}>
+				<Link href="/add/name" asChild>
+					<HapticPressable>
+						<MaterialIcons
+							name="add-circle-outline"
+							size={40}
+							color="white"
+						/>
+					</HapticPressable>
+				</Link>
 			</View>
 		</>
 	);
@@ -78,6 +78,7 @@ const styles = StyleSheet.create({
 	outerContainer: {
 		flex: 1,
 		backgroundColor: "black",
+		paddingTop: 36,
 	},
 	emptyContainer: {
 		flex: 1,
@@ -96,7 +97,7 @@ const styles = StyleSheet.create({
 	},
 	list: {
 		flex: 1,
-		paddingTop: 36,
+		// paddingVertical: 36,
 	},
 	passItem: {
 		paddingVertical: 10,
@@ -115,5 +116,6 @@ const styles = StyleSheet.create({
 		alignItems: "center",
 		paddingVertical: 11,
 		paddingHorizontal: 20,
+		backgroundColor: "black",
 	},
 });
