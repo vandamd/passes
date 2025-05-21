@@ -16,7 +16,6 @@ Supported codes:
 -   [x] Code 39
 -   [x] Code 93
 -   [x] ITF-14
--   [x] Codabar
 -   [x] Code 128
 -   [x] UPC-A
 
