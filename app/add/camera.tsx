@@ -1,14 +1,14 @@
 import React, { useState } from "react";
 import { View, StyleSheet, Button } from "react-native";
 import { Stack, useRouter, useLocalSearchParams } from "expo-router";
-import { StyledText } from "../../components/StyledText";
+import { StyledText } from "@/components/StyledText";
 import {
 	CameraType,
 	CameraView,
 	useCameraPermissions,
 	BarcodeScanningResult,
 } from "expo-camera";
-import { Header } from "@/components/Header";
+import ContentContainer from "@/components/ContentContainer";
 
 export default function CameraScreen() {
 	const router = useRouter();
@@ -57,11 +57,14 @@ export default function CameraScreen() {
 	return (
 		<>
 			<Stack.Screen />
-			<Header iconName="flip-camera-ios" onIconPress={handleSwapCamera} />
-
-			<View style={styles.container}>
+			<ContentContainer
+				headerTitle="Add Pass"
+				headerIcon="flip-camera-ios"
+				headerIconPress={handleSwapCamera}
+				style={{ paddingHorizontal: 0 }}
+			>
 				<CameraView
-					style={{ flex: 1 }}
+					style={{ height: "100%", width: "100%" }}
 					facing={facing as CameraType}
 					onBarcodeScanned={handleBarcodeScanned}
 					barcodeScannerSettings={{
@@ -82,7 +85,7 @@ export default function CameraScreen() {
 						],
 					}}
 				/>
-			</View>
+			</ContentContainer>
 		</>
 	);
 }

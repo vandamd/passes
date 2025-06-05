@@ -1,9 +1,14 @@
 import React, { useState, useCallback } from "react";
-import { View, TextInput, Pressable, StyleSheet } from "react-native";
+import { View, TextInput, StyleSheet } from "react-native";
 import { Stack, useRouter, useFocusEffect } from "expo-router";
-import { Header } from "@/components/Header";
+import ContentContainer from "@/components/ContentContainer";
+import { useInvertColors } from "@/contexts/InvertColorsContext";
+import { MaterialIcons } from "@expo/vector-icons";
+import { HapticPressable } from "@/components/HapticPressable";
+import * as Haptics from "expo-haptics";
 
 export default function NamePassScreen() {
+	const { invertColors } = useInvertColors();
 	const [passName, setPassName] = useState("");
 	const router = useRouter();
 
@@ -20,51 +25,72 @@ export default function NamePassScreen() {
 	return (
 		<>
 			<Stack.Screen />
-			<View style={styles.container}>
-				<Header
-					iconName="check"
-					onIconPress={handleNext}
-					iconShowLength={passName.length}
-					headerTitle="Name Pass"
-				/>
-
-				<View style={styles.content}>
+			<ContentContainer
+				headerTitle="Name Pass"
+				headerIcon="check"
+				headerIconPress={handleNext}
+				headerIconShowLength={passName.length}
+				style={{ gap: 32 }}
+			>
+				<View
+					style={[
+						styles.inputContainer,
+						{ borderBottomColor: invertColors ? "black" : "white" },
+					]}
+				>
 					<TextInput
-						style={styles.input}
-						onChangeText={setPassName}
-						value={passName}
-						placeholder=""
+						style={[
+							styles.input,
+							{ color: invertColors ? "black" : "white" },
+						]}
 						placeholderTextColor="#888"
+						value={passName}
+						placeholder="Pass Name"
+						onChangeText={setPassName}
 						autoFocus={true}
-						cursorColor="white"
-						selectionColor="white"
+						cursorColor={invertColors ? "black" : "white"}
+						selectionColor={invertColors ? "black" : "white"}
 						onSubmitEditing={handleNext}
 					/>
+					{passName.length > 0 && (
+						<HapticPressable
+							style={styles.clearButton}
+							onPress={() => {
+								setPassName("");
+								Haptics.impactAsync(
+									Haptics.ImpactFeedbackStyle.Medium
+								);
+							}}
+						>
+							<MaterialIcons
+								name="clear"
+								size={24}
+								color={invertColors ? "black" : "white"}
+							/>
+						</HapticPressable>
+					)}
 				</View>
-			</View>
+			</ContentContainer>
 		</>
 	);
 }
 
 const styles = StyleSheet.create({
-	container: {
-		flex: 1,
-		backgroundColor: "black",
-	},
-	content: {
-		flex: 1,
-		justifyContent: "flex-start",
+	inputContainer: {
+		flexDirection: "row",
 		alignItems: "center",
-		padding: 20,
+		width: "100%",
+		borderBottomWidth: 1,
 	},
 	input: {
-		width: "90%",
-		borderBottomWidth: 1,
-		borderBottomColor: "white",
-		color: "white",
+		flex: 1,
 		fontSize: 24,
 		fontFamily: "PublicSans-Regular",
 		paddingVertical: 2,
 		textAlign: "left",
+		paddingBottom: 6,
+	},
+	clearButton: {
+		padding: 5,
 	},
 });
