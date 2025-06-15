@@ -2,14 +2,13 @@
 	"expo": {
 		"name": "Passes",
 		"slug": "passes",
-		"version": "2.1.0",
+		"version": "2.1.1",
 		"orientation": "portrait",
 		"scheme": "passes",
 		"newArchEnabled": true,
 		"icon": "./assets/images/icon.png",
 		"android": {
 			"package": "com.vandamd.passes",
-			"edgeToEdgeEnabled": true,
 			"adaptiveIcon": {
 				"foregroundImage": "./assets/images/icon.png",
 				"backgroundColor": "#000000"

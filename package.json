@@ -1,7 +1,7 @@
 {
 	"name": "passes",
 	"main": "expo-router/entry",
-	"version": "2.1",
+	"version": "2.1.1",
 	"scripts": {
 		"start": "expo start",
 		"reset-project": "node ./scripts/reset-project.js",
@@ -28,7 +28,8 @@
 		"react-native-safe-area-context": "5.4.0",
 		"react-native-screens": "~4.10.0",
 		"react-native-svg": "15.11.2",
-		"react-native-svg-transformer": "^1.5.1"
+		"react-native-svg-transformer": "^1.5.1",
+		"expo-navigation-bar": "~4.2.5"
 	},
 	"devDependencies": {
 		"@babel/core": "^7.25.2",

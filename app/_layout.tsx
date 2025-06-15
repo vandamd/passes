@@ -10,6 +10,7 @@ import { setStatusBarHidden } from "expo-status-bar";
 import * as SystemUI from "expo-system-ui";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { PassesProvider } from "@/contexts/PassesContext";
+import * as NavigationBar from 'expo-navigation-bar';
 
 function RootNavigation() {
 	useFonts({
@@ -21,6 +22,8 @@ function RootNavigation() {
 	}, []);
 
 	const { invertColors } = useInvertColors();
+
+    NavigationBar.setVisibilityAsync("hidden");
 
 	useEffect(() => {
 		const newColor = invertColors ? "#FFFFFF" : "#000000";
