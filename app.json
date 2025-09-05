@@ -1,28 +1,28 @@
 {
-	"expo": {
-		"name": "Passes",
-		"slug": "passes",
-		"version": "2.1.2",
-		"orientation": "portrait",
-		"scheme": "passes",
-		"newArchEnabled": true,
-		"icon": "./assets/images/icon.png",
-		"android": {
-			"package": "com.vandamd.passes",
-			"adaptiveIcon": {
-				"foregroundImage": "./assets/images/icon.png",
-				"backgroundColor": "#000000"
-			}
-		},
-		"plugins": ["expo-router", "expo-secure-store"],
-		"experiments": {
-			"typedRoutes": true
-		},
-		"extra": {
-			"router": {},
-			"eas": {
-				"projectId": "f0513931-307a-42e4-856f-fc0a10e9c922"
-			}
-		}
-	}
+    "expo": {
+        "name": "Passes",
+        "slug": "passes",
+        "version": "2.1.3",
+        "orientation": "portrait",
+        "scheme": "passes",
+        "newArchEnabled": true,
+        "icon": "./assets/images/icon.png",
+        "android": {
+            "package": "com.vandamd.passes",
+            "adaptiveIcon": {
+                "foregroundImage": "./assets/images/icon.png",
+                "backgroundColor": "#000000"
+            }
+        },
+        "plugins": ["expo-router", "expo-secure-store"],
+        "experiments": {
+            "typedRoutes": true
+        },
+        "extra": {
+            "router": {},
+            "eas": {
+                "projectId": "f0513931-307a-42e4-856f-fc0a10e9c922"
+            }
+        }
+    }
 }

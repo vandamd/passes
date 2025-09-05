@@ -2,8 +2,8 @@ import React, { useEffect } from "react";
 import { Stack } from "expo-router";
 import { HapticProvider } from "../contexts/HapticContext";
 import {
-	InvertColorsProvider,
-	useInvertColors,
+    InvertColorsProvider,
+    useInvertColors,
 } from "@/contexts/InvertColorsContext";
 import { useFonts } from "expo-font";
 import { setStatusBarHidden } from "expo-status-bar";
@@ -13,43 +13,43 @@ import { PassesProvider } from "@/contexts/PassesContext";
 import * as NavigationBar from 'expo-navigation-bar';
 
 function RootNavigation() {
-	useFonts({
-		"PublicSans-Regular": require("../assets/fonts/PublicSans-Regular.ttf"),
-	});
+    useFonts({
+        "PublicSans-Regular": require("../assets/fonts/PublicSans-Regular.ttf"),
+    });
 
-	useEffect(() => {
-		setStatusBarHidden(true, "none");
-	}, []);
+    useEffect(() => {
+        setStatusBarHidden(true, "none");
+    }, []);
 
-	const { invertColors } = useInvertColors();
+    const { invertColors } = useInvertColors();
 
     NavigationBar.setVisibilityAsync("hidden");
 
-	useEffect(() => {
-		const newColor = invertColors ? "#FFFFFF" : "#000000";
-		SystemUI.setBackgroundColorAsync(newColor);
-	}, [invertColors]);
+    useEffect(() => {
+        const newColor = invertColors ? "#FFFFFF" : "#000000";
+        SystemUI.setBackgroundColorAsync(newColor);
+    }, [invertColors]);
 
-	return (
-		<Stack
-			screenOptions={{
-				headerShown: false,
-				animation: "none",
-			}}
-		></Stack>
-	);
+    return (
+        <Stack
+            screenOptions={{
+                headerShown: false,
+                animation: "none",
+            }}
+        ></Stack>
+    );
 }
 
 export default function RootLayout() {
-	return (
-		<SafeAreaProvider>
-			<HapticProvider>
-				<InvertColorsProvider>
-					<PassesProvider>
-						<RootNavigation />
-					</PassesProvider>
-				</InvertColorsProvider>
-			</HapticProvider>
-		</SafeAreaProvider>
-	);
+    return (
+        <SafeAreaProvider>
+            <HapticProvider>
+                <InvertColorsProvider>
+                    <PassesProvider>
+                        <RootNavigation />
+                    </PassesProvider>
+                </InvertColorsProvider>
+            </HapticProvider>
+        </SafeAreaProvider>
+    );
 }

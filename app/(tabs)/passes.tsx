@@ -6,34 +6,33 @@ import { StyledButton } from "@/components/StyledButton";
 import { View } from "react-native";
 
 export default function PassesScreen() {
-	const { passes } = usePasses();
+    const { passes } = usePasses();
 
-	return (
-		<ContentContainer
-			headerTitle="Passes"
-			hideBackButton={true}
-			style={{ gap: 20 }}
-		>
-			<CustomScrollView>
-				{passes.map((pass) => (
-					<View key={pass.id} style={{ marginBottom: 15 }}>
-						<StyledButton
-							text={pass.name}
-							onPress={() => {
-								router.push({
-									pathname: "/add/qrDisplay",
-									params: {
-										passId: pass.id,
-										scannedData: pass.data,
-										passName: pass.name,
-									},
-								});
-							}}
-							fontSize={28}
-						/>
-					</View>
-				))}
-			</CustomScrollView>
-		</ContentContainer>
-	);
+    return (
+        <ContentContainer
+            headerTitle="Passes"
+            hideBackButton={true}
+            style={{ gap: 20 }}
+        >
+            <CustomScrollView>
+                {passes.map((pass) => (
+                    <View key={pass.id} style={{ marginBottom: 15 }}>
+                        <StyledButton
+                            text={pass.name}
+                            onPress={() => {
+                                router.push({
+                                    pathname: "/add/qrDisplay",
+                                    params: {
+                                        passId: pass.id,
+                                        scannedData: pass.data,
+                                        passName: pass.name,
+                                    },
+                                });
+                            }}
+                        />
+                    </View>
+                ))}
+            </CustomScrollView>
+        </ContentContainer>
+    );
 }

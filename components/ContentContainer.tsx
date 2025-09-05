@@ -13,6 +13,7 @@ interface ContentContainerProps {
 	headerIconShowLength?: number;
 	style?: StyleProp<ViewStyle>;
 	backEvent?: () => void;
+	onTitlePress?: () => void;
 }
 
 export default function ContentContainer({
@@ -24,6 +25,7 @@ export default function ContentContainer({
 	headerIconShowLength = 1,
 	style,
 	backEvent,
+	onTitlePress,
 }: ContentContainerProps) {
 	const { invertColors } = useInvertColors();
 	return (
@@ -41,6 +43,7 @@ export default function ContentContainer({
 					onIconPress={headerIconPress}
 					iconShowLength={headerIconShowLength}
 					backEvent={backEvent}
+					onTitlePress={onTitlePress}
 				/>
 			)}
 			<View style={[styles.content, style]}>{children ?? null}</View>

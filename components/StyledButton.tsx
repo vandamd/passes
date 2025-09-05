@@ -11,7 +11,7 @@ interface ButtonProps {
 export function StyledButton({ text, onPress }: ButtonProps) {
     return (
         <HapticPressable style={styles.button} onPress={onPress}>
-            <StyledText style={styles.buttonText}>{text}</StyledText>
+            <StyledText style={styles.buttonText} numberOfLines={1}>{text}</StyledText>
         </HapticPressable>
     );
 }
@@ -19,11 +19,14 @@ export function StyledButton({ text, onPress }: ButtonProps) {
 const styles = StyleSheet.create({
     button: {
         flexDirection: "row",
-        justifyContent: "space-between",
+        justifyContent: "flex-start",
         alignItems: "center",
+        width: "100%",
     },
     buttonText: {
         fontSize: 30,
+        flex: 1,
+        textAlign: "left",
     },
 });
 

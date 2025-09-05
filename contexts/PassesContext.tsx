@@ -19,6 +19,7 @@ interface PassesContextType {
 	addPass: (name: string, data: string, type: string) => void;
 	getPassById: (id: string) => Pass | undefined;
 	deletePass: (id: string) => void;
+	updatePassName: (id: string, newName: string) => void;
 }
 
 const PASSES_STORAGE_KEY = "userPasses_v1"; // Added a version for potential future migrations
@@ -95,9 +96,17 @@ export const PassesProvider: React.FC<{ children: ReactNode }> = ({
 		setPasses((prevPasses) => prevPasses.filter((pass) => pass.id !== id));
 	};
 
+	const updatePassName = (id: string, newName: string) => {
+		setPasses((prevPasses) =>
+			prevPasses.map((pass) =>
+				pass.id === id ? { ...pass, name: newName } : pass
+			)
+		);
+	};
+
 	return (
 		<PassesContext.Provider
-			value={{ passes, addPass, getPassById, deletePass }}
+			value={{ passes, addPass, getPassById, deletePass, updatePassName }}
 		>
 			{children}
 		</PassesContext.Provider>
