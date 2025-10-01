@@ -8,13 +8,13 @@ interface ButtonProps {
     onPress?: () => void;
 }
 
-export function StyledButton({ text, onPress }: ButtonProps) {
+export const StyledButton = React.memo(({ text, onPress }: ButtonProps) => {
     return (
         <HapticPressable style={styles.button} onPress={onPress}>
             <StyledText style={styles.buttonText} numberOfLines={1}>{text}</StyledText>
         </HapticPressable>
     );
-}
+});
 
 const styles = StyleSheet.create({
     button: {

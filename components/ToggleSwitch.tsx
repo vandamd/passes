@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo, useCallback } from "react";
 import { View, StyleSheet } from "react-native";
 import { StyledText } from "./StyledText";
 import { HapticPressable } from "./HapticPressable";
@@ -15,51 +15,57 @@ const CIRCLE_BORDER = 2.5;
 const LINE_WIDTH = 14.5;
 const LINE_HEIGHT = 2.22;
 
-const ToggleSwitchGraphic = ({ value, color }: ToggleSwitchGraphicProps) => {
+const graphicBaseStyles = StyleSheet.create({
+	container: {
+		flexDirection: "row",
+		alignItems: "center",
+	},
+	circleBase: {
+		width: CIRCLE_DIAMETER,
+		height: CIRCLE_DIAMETER,
+		borderRadius: CIRCLE_DIAMETER / 2,
+	},
+	hollowCircleBase: {
+		width: CIRCLE_DIAMETER,
+		height: CIRCLE_DIAMETER,
+		borderRadius: CIRCLE_DIAMETER / 2,
+		borderWidth: CIRCLE_BORDER,
+	},
+	lineBase: {
+		width: LINE_WIDTH,
+		height: LINE_HEIGHT,
+	},
+});
+
+const ToggleSwitchGraphic = React.memo(({ value }: ToggleSwitchGraphicProps) => {
 	const { invertColors } = useInvertColors();
+
 	const switchColor = invertColors ? "black" : "white";
 
-	const graphicStyles = StyleSheet.create({
-		container: {
-			flexDirection: "row",
-			alignItems: "center",
-		},
-		circle: {
-			width: CIRCLE_DIAMETER,
-			height: CIRCLE_DIAMETER,
-			borderRadius: CIRCLE_DIAMETER / 2,
-			backgroundColor: switchColor,
-		},
-		hollowCircle: {
-			width: CIRCLE_DIAMETER,
-			height: CIRCLE_DIAMETER,
-			borderRadius: CIRCLE_DIAMETER / 2,
-			borderWidth: CIRCLE_BORDER,
-			borderColor: switchColor,
-		},
-		line: {
-			width: LINE_WIDTH,
-			height: LINE_HEIGHT,
-			backgroundColor: switchColor,
-		},
-	});
+	const circleStyle = useMemo(() => ({
+		backgroundColor: switchColor
+	}), [switchColor]);
+
+	const borderStyle = useMemo(() => ({
+		borderColor: switchColor
+	}), [switchColor]);
 
 	return (
-		<View style={graphicStyles.container}>
+		<View style={graphicBaseStyles.container}>
 			{!value ? (
 				<>
-					<View style={graphicStyles.hollowCircle} />
-					<View style={graphicStyles.line} />
+					<View style={[graphicBaseStyles.hollowCircleBase, borderStyle]} />
+					<View style={[graphicBaseStyles.lineBase, circleStyle]} />
 				</>
 			) : (
 				<>
-					<View style={graphicStyles.line} />
-					<View style={graphicStyles.circle} />
+					<View style={[graphicBaseStyles.lineBase, circleStyle]} />
+					<View style={[graphicBaseStyles.circleBase, circleStyle]} />
 				</>
 			)}
 		</View>
 	);
-};
+});
 
 interface ToggleSwitchProps {
 	label: string;
@@ -68,28 +74,30 @@ interface ToggleSwitchProps {
 	color?: string;
 }
 
-export function ToggleSwitch({
+export const ToggleSwitch = React.memo(({
 	label,
 	value,
 	onValueChange,
 	color = "white",
-}: ToggleSwitchProps) {
+}: ToggleSwitchProps) => {
+	const handleToggle = useCallback(() => {
+		onValueChange(!value);
+	}, [value, onValueChange]);
+
 	return (
 		<HapticPressable
-			onPress={() => {
-				onValueChange(!value);
-			}}
-			style={[styles.container]}
+			onPress={handleToggle}
+			style={styles.container}
 		>
 			<View style={styles.switchTouchable}>
 				<ToggleSwitchGraphic value={value} color={color} />
 			</View>
 			<View style={styles.textTouchable}>
-				<StyledText style={[styles.label]}>{label}</StyledText>
+				<StyledText style={styles.label}>{label}</StyledText>
 			</View>
 		</HapticPressable>
 	);
-}
+});
 
 const styles = StyleSheet.create({
 	container: {

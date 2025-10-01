@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { Text as DefaultText, TextProps, StyleSheet } from "react-native";
 import { useInvertColors } from "@/contexts/InvertColorsContext";
 
@@ -6,19 +6,24 @@ interface StyledTextProps extends TextProps {
     children: React.ReactNode;
 }
 
-export function StyledText({ style, ...rest }: StyledTextProps) {
+export const StyledText = React.memo(({ style, ...rest }: StyledTextProps) => {
     const { invertColors } = useInvertColors();
+
+    const textColor = useMemo(() => ({
+        color: invertColors ? "black" : "white"
+    }), [invertColors]);
+
     return (
         <DefaultText
             style={[
                 styles.text,
-                { color: invertColors ? "black" : "white" },
+                textColor,
                 style,
             ]}
             {...rest}
         />
     );
-}
+});
 
 const styles = StyleSheet.create({
     text: {

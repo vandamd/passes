@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 import { View, StyleSheet, Button, Linking, Alert } from "react-native";
 import { Stack, useRouter } from "expo-router";
 import { StyledText } from "@/components/StyledText";
@@ -15,11 +15,11 @@ export default function ScanScreen() {
 	const [facing, setFacing] = useState<CameraType>("back");
 	const [permission, requestPermission] = useCameraPermissions();
 
-	const handleSwapCamera = () => {
+	const handleSwapCamera = useCallback(() => {
 		setFacing((current) => (current === "back" ? "front" : "back"));
-	};
+	}, []);
 
-	const handleBarcodeScanned = async (scanningResult: BarcodeScanningResult) => {
+	const handleBarcodeScanned = useCallback(async (scanningResult: BarcodeScanningResult) => {
 		const data = scanningResult.data;
 
 		// Check if the scanned data is a URL
@@ -37,7 +37,7 @@ export default function ScanScreen() {
 		} else {
 			Alert.alert("Not a URL", `Scanned: ${data}`);
 		}
-	};
+	}, []);
 
 	if (!permission) {
 		return <View />;
@@ -46,13 +46,7 @@ export default function ScanScreen() {
 	if (!permission.granted) {
 		return (
 			<View style={styles.container}>
-				<StyledText
-					style={{
-						textAlign: "center",
-						color: "white",
-						marginBottom: 10,
-					}}
-				>
+				<StyledText style={styles.permissionText}>
 					We need your permission to show the camera
 				</StyledText>
 				<Button onPress={requestPermission} title="Grant Permission" />
@@ -67,10 +61,10 @@ export default function ScanScreen() {
 				headerTitle="Scan QR Code"
 				headerIcon="flip-camera-ios"
 				headerIconPress={handleSwapCamera}
-				style={{ paddingHorizontal: 0 }}
+				style={styles.contentContainer}
 			>
 				<CameraView
-					style={{ height: "100%", width: "100%" }}
+					style={styles.camera}
 					facing={facing as CameraType}
 					onBarcodeScanned={handleBarcodeScanned}
 					barcodeScannerSettings={{
@@ -86,5 +80,17 @@ const styles = StyleSheet.create({
 	container: {
 		flex: 1,
 		backgroundColor: "black",
+	},
+	permissionText: {
+		textAlign: "center",
+		color: "white",
+		marginBottom: 10,
+	},
+	contentContainer: {
+		paddingHorizontal: 0,
+	},
+	camera: {
+		height: "100%",
+		width: "100%",
 	},
 });

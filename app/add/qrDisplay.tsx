@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { View, StyleSheet, Image, PixelRatio } from "react-native";
 import { Stack, useRouter, useLocalSearchParams } from "expo-router";
 import { StyledText } from "@/components/StyledText";
@@ -7,23 +7,36 @@ import { toDataURL, type DataURL } from "@bwip-js/react-native";
 import ContentContainer from "@/components/ContentContainer";
 import { useInvertColors } from "@/contexts/InvertColorsContext";
 
+const BARCODE_TYPE_MAPPING: Readonly<Record<string, string>> = {
+    aztec: "azteccode",
+    ean13: "ean13",
+    ean8: "ean8",
+    qr: "qrcode",
+    pdf417: "pdf417",
+    upc_e: "upce",
+    datamatrix: "datamatrix",
+    code39: "code39",
+    code93: "code93",
+    itf14: "itf14",
+    codabar: "rationalizedCodabar",
+    code128: "code128",
+    upc_a: "upca",
+};
+
+const ONE_DIMENSIONAL_CODES = [
+    "ean13",
+    "ean8",
+    "upce",
+    "code39",
+    "code93",
+    "itf14",
+    "rationalizedCodabar",
+    "code128",
+    "upca",
+] as const;
+
 const getBwipJsBcid = (expoType: string): string => {
-    const mapping: { [key: string]: string } = {
-        aztec: "azteccode",
-        ean13: "ean13",
-        ean8: "ean8",
-        qr: "qrcode",
-        pdf417: "pdf417",
-        upc_e: "upce",
-        datamatrix: "datamatrix",
-        code39: "code39",
-        code93: "code93",
-        itf14: "itf14",
-        codabar: "rationalizedCodabar",
-        code128: "code128",
-        upc_a: "upca",
-    };
-    return mapping[expoType.toLowerCase()] || expoType;
+    return BARCODE_TYPE_MAPPING[expoType.toLowerCase()] || expoType;
 };
 
 export default function QRDisplayScreen() {
@@ -69,20 +82,10 @@ export default function QRDisplayScreen() {
     }, [barcodeSource, viewSize]);
 
     useEffect(() => {
+        let cancelled = false;
+
         if (currentData && currentType) {
             const bcidForBwipJs = getBwipJsBcid(currentType);
-
-            const oneDimensionalCodes = [
-                "ean13",
-                "ean8",
-                "upce",
-                "code39",
-                "code93",
-                "itf14",
-                "rationalizedCodabar",
-                "code128",
-                "upca",
-            ];
 
             const bwipJsOptions = {
                 bcid: bcidForBwipJs,
@@ -95,48 +98,72 @@ export default function QRDisplayScreen() {
             };
 
             toDataURL(bwipJsOptions)
-                .then(setBarcodeSource)
+                .then(result => {
+                    if (!cancelled) {
+                        setBarcodeSource(result);
+                    }
+                })
                 .catch((err: Error) => {
-                    console.error(
-                        "bwip-js toDataURL error:",
-                        err.message ? err.message : err
-                    );
-                    setBarcodeSource(null);
+                    if (!cancelled) {
+                        console.error(
+                            "bwip-js toDataURL error:",
+                            err.message ? err.message : err
+                        );
+                        setBarcodeSource(null);
+                    }
                 });
         } else {
             setBarcodeSource(null);
         }
+
+        return () => {
+            cancelled = true;
+        };
     }, [currentData, currentType]);
 
-    if (!currentData) {
-        router.replace("/");
-        return null;
-    }
-
-    const handleSavePassAndGoHome = () => {
+    const handleSavePassAndGoHome = useCallback(() => {
         const typeToSave = existingPass ? existingPass.type : scannedType;
         if (currentData && currentPassName && typeToSave && !existingPass) {
             addPass(currentPassName, currentData, typeToSave);
         }
         router.replace("/");
-    };
+    }, [existingPass, scannedType, currentData, currentPassName, addPass, router]);
 
-    const handleDeletePass = () => {
+    const handleDeletePass = useCallback(() => {
         if (existingPass) {
             deletePass(existingPass.id);
             router.replace("/");
         }
-    };
+    }, [existingPass, deletePass, router]);
 
-    const handleRename = () => {
+    const handleRename = useCallback(() => {
         router.push({
             pathname: "/rename",
-            params: { 
+            params: {
                 currentName: currentPassName,
-                passId: existingPass?.id 
+                passId: existingPass?.id
             }
         });
-    };
+    }, [router, currentPassName, existingPass?.id]);
+
+    const containerBg = useMemo(() => ({
+        backgroundColor: invertColors ? "white" : "black"
+    }), [invertColors]);
+
+    const imageStyle = useMemo(() => ({
+        width: scaledSize.width,
+        height: scaledSize.height,
+    }), [scaledSize.width, scaledSize.height]);
+
+    const handleLayout = useCallback((event: any) => {
+        const { width, height } = event.nativeEvent.layout;
+        setViewSize({ width, height });
+    }, []);
+
+    if (!currentData) {
+        router.replace("/");
+        return null;
+    }
 
     return (
         <>
@@ -150,30 +177,17 @@ export default function QRDisplayScreen() {
                 onTitlePress={handleRename}
             >
                 <View
-                    style={[
-                        styles.contentContainer,
-                        { backgroundColor: invertColors ? "white" : "black" },
-                    ]}
-                    onLayout={(event) => {
-                        const { width, height } = event.nativeEvent.layout;
-                        setViewSize({ width, height });
-                    }}
+                    style={[styles.contentContainer, containerBg]}
+                    onLayout={handleLayout}
                 >
                     <View style={styles.qrContainer}>
                         {barcodeSource && scaledSize.width > 0 ? (
                             <Image
-                                style={{
-                                    width: scaledSize.width,
-                                    height: scaledSize.height,
-                                }}
+                                style={imageStyle}
                                 source={{ uri: barcodeSource.uri }}
                             />
                         ) : (
-                            <StyledText
-                                style={{
-                                    color: "black",
-                                }}
-                            >
+                            <StyledText style={styles.loadingText}>
                                 {currentData
                                     ? `Generating ${currentType.toUpperCase()} Code...`
                                     : "No data for Barcode"}
@@ -199,5 +213,8 @@ const styles = StyleSheet.create({
         backgroundColor: "white",
         alignItems: "center",
         justifyContent: "center",
+    },
+    loadingText: {
+        color: "black",
     },
 });

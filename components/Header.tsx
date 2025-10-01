@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useCallback, useMemo } from "react";
 import { MaterialIcons } from "@expo/vector-icons";
 import { StyleSheet, View } from "react-native";
 import { router } from "expo-router";
@@ -16,7 +16,7 @@ interface HeaderProps {
     onTitlePress?: () => void;
 }
 
-export function Header({
+export const Header = React.memo(({
     iconName,
     onIconPress,
     iconShowLength = 1,
@@ -24,51 +24,37 @@ export function Header({
     backEvent,
     hideBackButton = false,
     onTitlePress,
-}: HeaderProps) {
+}: HeaderProps) => {
     const { invertColors } = useInvertColors();
-    const handleBack = backEvent
-        ? backEvent
-        : () => {
-            if (router.canGoBack()) {
-                router.back();
-            }
-        };
+
+    const handleBack = useCallback(() => {
+        if (backEvent) {
+            backEvent();
+        } else if (router.canGoBack()) {
+            router.back();
+        }
+    }, [backEvent]);
+
+    const headerBg = useMemo(() => ({
+        backgroundColor: invertColors ? "white" : "black"
+    }), [invertColors]);
+
+    const iconColor = invertColors ? "black" : "white";
 
     return (
-        <View
-            style={[
-                styles.header,
-                { backgroundColor: invertColors ? "white" : "black" },
-            ]}
-        >
+        <View style={[styles.header, headerBg]}>
             {!hideBackButton ? (
                 <HapticPressable onPress={handleBack}>
-                    <View
-                        style={{
-                            width: 32,
-                            height: 32,
-                            alignItems: "center",
-                            paddingTop: 6,
-                            paddingRight: 4,
-                        }}
-                    >
+                    <View style={styles.iconContainerLeft}>
                         <MaterialIcons
                             name="arrow-back-ios"
                             size={28}
-                            color={invertColors ? "black" : "white"}
+                            color={iconColor}
                         />
                     </View>
                 </HapticPressable>
             ) : (
-                <View
-                    style={{
-                        width: 32,
-                        height: 32,
-                        alignItems: "center",
-                        paddingTop: 6,
-                        paddingRight: 4,
-                    }}
-                ></View>
+                <View style={styles.iconContainerLeft}></View>
             )}
 
             {onTitlePress ? (
@@ -84,36 +70,20 @@ export function Header({
             )}
             {iconShowLength > 0 && iconName ? (
                 <HapticPressable onPress={onIconPress}>
-                    <View
-                        style={{
-                            width: 32,
-                            height: 32,
-                            alignItems: "center",
-                            paddingTop: 6,
-                            paddingLeft: 4,
-                        }}
-                    >
+                    <View style={styles.iconContainerRight}>
                         <MaterialIcons
                             name={iconName}
                             size={28}
-                            color={invertColors ? "black" : "white"}
+                            color={iconColor}
                         />
                     </View>
                 </HapticPressable>
             ) : (
-                <View
-                    style={{
-                        width: 32,
-                        height: 32,
-                        alignItems: "center",
-                        paddingTop: 6,
-                        paddingLeft: 4,
-                    }}
-                ></View>
+                <View style={styles.iconContainerRight}></View>
             )}
         </View>
     );
-}
+});
 
 const styles = StyleSheet.create({
     header: {
@@ -134,5 +104,19 @@ const styles = StyleSheet.create({
         flex: 1,
         alignItems: "center",
         justifyContent: "center",
+    },
+    iconContainerLeft: {
+        width: 32,
+        height: 32,
+        alignItems: "center",
+        paddingTop: 6,
+        paddingRight: 4,
+    },
+    iconContainerRight: {
+        width: 32,
+        height: 32,
+        alignItems: "center",
+        paddingTop: 6,
+        paddingLeft: 4,
     },
 });

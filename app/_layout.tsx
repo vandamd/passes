@@ -13,22 +13,25 @@ import { PassesProvider } from "@/contexts/PassesContext";
 import * as NavigationBar from 'expo-navigation-bar';
 
 function RootNavigation() {
-    useFonts({
+    const [fontsLoaded] = useFonts({
         "PublicSans-Regular": require("../assets/fonts/PublicSans-Regular.ttf"),
     });
 
-    useEffect(() => {
-        setStatusBarHidden(true, "none");
-    }, []);
-
     const { invertColors } = useInvertColors();
 
-    NavigationBar.setVisibilityAsync("hidden");
+    useEffect(() => {
+        setStatusBarHidden(true, "none");
+        NavigationBar.setVisibilityAsync("hidden");
+    }, []);
 
     useEffect(() => {
         const newColor = invertColors ? "#FFFFFF" : "#000000";
         SystemUI.setBackgroundColorAsync(newColor);
     }, [invertColors]);
+
+    if (!fontsLoaded) {
+        return null;
+    }
 
     return (
         <Stack

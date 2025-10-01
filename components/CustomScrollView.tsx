@@ -1,4 +1,4 @@
-import React, { useState, useRef, PropsWithChildren } from "react";
+import React, { useState, useRef, PropsWithChildren, useMemo, useCallback } from "react";
 import {
 	ScrollView,
 	View,
@@ -14,7 +14,7 @@ interface CustomScrollViewProps extends ScrollViewProps {
 	// We can add any custom props here if needed in the future
 }
 
-const CustomScrollView: React.FC<PropsWithChildren<CustomScrollViewProps>> = ({
+const CustomScrollView: React.FC<PropsWithChildren<CustomScrollViewProps>> = React.memo(({
 	children,
 	style,
 	contentContainerStyle,
@@ -25,26 +25,25 @@ const CustomScrollView: React.FC<PropsWithChildren<CustomScrollViewProps>> = ({
 	const [scrollViewHeight, setScrollViewHeight] = useState<number>(0);
 	const scrollY = useRef(new Animated.Value(0)).current;
 
-	const scrollIndicatorHeight =
-		scrollViewHeight > 0 &&
-		contentHeight > 0 &&
-		contentHeight > scrollViewHeight
-			? Math.max(
-					(scrollViewHeight * scrollViewHeight) / contentHeight,
-					20
-			  ) // Min height of 20
-			: 0;
+	const scrollIndicatorHeight = useMemo(() => {
+		if (scrollViewHeight > 0 && contentHeight > 0 && contentHeight > scrollViewHeight) {
+			return Math.max((scrollViewHeight * scrollViewHeight) / contentHeight, 20);
+		}
+		return 0;
+	}, [scrollViewHeight, contentHeight]);
 
-	const scrollIndicatorPosition =
-		contentHeight > scrollViewHeight && scrollIndicatorHeight > 0
-			? scrollY.interpolate({
-					inputRange: [0, contentHeight - scrollViewHeight],
-					outputRange: [0, scrollViewHeight - scrollIndicatorHeight],
-					extrapolate: "clamp",
-			  })
-			: 0;
+	const scrollIndicatorPosition = useMemo(() => {
+		if (contentHeight > scrollViewHeight && scrollIndicatorHeight > 0) {
+			return scrollY.interpolate({
+				inputRange: [0, contentHeight - scrollViewHeight],
+				outputRange: [0, scrollViewHeight - scrollIndicatorHeight],
+				extrapolate: "clamp",
+			});
+		}
+		return 0;
+	}, [contentHeight, scrollViewHeight, scrollIndicatorHeight, scrollY]);
 
-	const handleScroll = Animated.event(
+	const handleScroll = useMemo(() => Animated.event(
 		[{ nativeEvent: { contentOffset: { y: scrollY } } }],
 		{
 			useNativeDriver: false,
@@ -54,28 +53,45 @@ const CustomScrollView: React.FC<PropsWithChildren<CustomScrollViewProps>> = ({
 				}
 			},
 		}
-	);
+	), [scrollY, rest.onScroll]);
+
+	const handleContentSizeChange = useCallback((width: number, height: number) => {
+		setContentHeight(height);
+		if (rest.onContentSizeChange) {
+			rest.onContentSizeChange(width, height);
+		}
+	}, [rest.onContentSizeChange]);
+
+	const handleLayout = useCallback((event: any) => {
+		const { height } = event.nativeEvent.layout;
+		setScrollViewHeight(height);
+		if (rest.onLayout) {
+			rest.onLayout(event);
+		}
+	}, [rest.onLayout]);
+
+	const scrollViewStyle = useMemo(() => [{ width: "100%" }, style], [style]);
+	const scrollContentStyle = useMemo(() => [{ flexGrow: 1 }, contentContainerStyle], [contentContainerStyle]);
+
+	const trackBgColor = useMemo(() => ({
+		backgroundColor: invertColors ? "black" : "white"
+	}), [invertColors]);
+
+	const thumbStyle = useMemo(() => ({
+		backgroundColor: invertColors ? "black" : "white",
+		height: scrollIndicatorHeight,
+		transform: [{ translateY: scrollIndicatorPosition as any }],
+	}), [invertColors, scrollIndicatorHeight, scrollIndicatorPosition]);
 
 	return (
 		<View style={styles.container}>
 			<ScrollView
-				style={[{ width: "100%" }, style]}
-				contentContainerStyle={[{ flexGrow: 1 }, contentContainerStyle]}
+				style={scrollViewStyle}
+				contentContainerStyle={scrollContentStyle}
 				showsVerticalScrollIndicator={false}
 				overScrollMode="never"
-				onContentSizeChange={(width, height) => {
-					setContentHeight(height);
-					if (rest.onContentSizeChange) {
-						rest.onContentSizeChange(width, height);
-					}
-				}}
-				onLayout={(event) => {
-					const { height } = event.nativeEvent.layout;
-					setScrollViewHeight(height);
-					if (rest.onLayout) {
-						rest.onLayout(event);
-					}
-				}}
+				onContentSizeChange={handleContentSizeChange}
+				onLayout={handleLayout}
 				onScroll={handleScroll}
 				scrollEventThrottle={16}
 				{...rest}
@@ -83,37 +99,13 @@ const CustomScrollView: React.FC<PropsWithChildren<CustomScrollViewProps>> = ({
 				{children}
 			</ScrollView>
 			{scrollIndicatorHeight > 0 && (
-				<View
-					style={[
-						styles.scrollIndicatorTrack,
-						{ transform: [{ translateX: 1 }] },
-						{ backgroundColor: invertColors ? "black" : "white" },
-					]}
-				>
-					<Animated.View
-						style={[
-							styles.scrollIndicatorThumb,
-							{
-								backgroundColor: invertColors
-									? "black"
-									: "white",
-							},
-							{
-								height: scrollIndicatorHeight,
-								transform: [
-									{
-										translateY:
-											scrollIndicatorPosition as any,
-									},
-								],
-							},
-						]}
-					/>
+				<View style={[styles.scrollIndicatorTrack, styles.trackTransform, trackBgColor]}>
+					<Animated.View style={[styles.scrollIndicatorThumb, thumbStyle]} />
 				</View>
 			)}
 		</View>
 	);
-};
+});
 
 const styles = StyleSheet.create({
 	container: {
@@ -126,6 +118,9 @@ const styles = StyleSheet.create({
 		height: "100%",
 		position: "absolute",
 		right: -18,
+	},
+	trackTransform: {
+		transform: [{ translateX: 1 }],
 	},
 	scrollIndicatorThumb: {
 		width: 5,

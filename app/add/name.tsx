@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useMemo } from "react";
 import { View, TextInput, StyleSheet } from "react-native";
 import { Stack, useRouter, useFocusEffect } from "expo-router";
 import ContentContainer from "@/components/ContentContainer";
@@ -18,9 +18,23 @@ export default function NamePassScreen() {
 		}, [])
 	);
 
-	const handleNext = () => {
+	const handleNext = useCallback(() => {
 		router.push({ pathname: "/add/camera", params: { passName } });
-	};
+	}, [router, passName]);
+
+	const handleClear = useCallback(() => {
+		setPassName("");
+		Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+	}, []);
+
+	const dynamicStyles = useMemo(() => ({
+		container: { gap: 32 },
+		inputContainerBorder: { borderBottomColor: invertColors ? "black" : "white" },
+		inputText: { color: invertColors ? "black" : "white" },
+	}), [invertColors]);
+
+	const cursorColor = invertColors ? "black" : "white";
+	const iconColor = invertColors ? "black" : "white";
 
 	return (
 		<>
@@ -30,42 +44,29 @@ export default function NamePassScreen() {
 				headerIcon="check"
 				headerIconPress={handleNext}
 				headerIconShowLength={passName.length}
-				style={{ gap: 32 }}
+				style={dynamicStyles.container}
 			>
-				<View
-					style={[
-						styles.inputContainer,
-						{ borderBottomColor: invertColors ? "black" : "white" },
-					]}
-				>
+				<View style={[styles.inputContainer, dynamicStyles.inputContainerBorder]}>
 					<TextInput
-						style={[
-							styles.input,
-							{ color: invertColors ? "black" : "white" },
-						]}
+						style={[styles.input, dynamicStyles.inputText]}
 						placeholderTextColor="#888"
 						value={passName}
 						placeholder="Pass Name"
 						onChangeText={setPassName}
 						autoFocus={true}
-						cursorColor={invertColors ? "black" : "white"}
-						selectionColor={invertColors ? "black" : "white"}
+						cursorColor={cursorColor}
+						selectionColor={cursorColor}
 						onSubmitEditing={handleNext}
 					/>
 					{passName.length > 0 && (
 						<HapticPressable
 							style={styles.clearButton}
-							onPress={() => {
-								setPassName("");
-								Haptics.impactAsync(
-									Haptics.ImpactFeedbackStyle.Medium
-								);
-							}}
+							onPress={handleClear}
 						>
 							<MaterialIcons
 								name="clear"
 								size={24}
-								color={invertColors ? "black" : "white"}
+								color={iconColor}
 							/>
 						</HapticPressable>
 					)}
