@@ -35,6 +35,7 @@ function RootNavigation() {
             screenOptions={{
                 headerShown: false,
                 animation: "none",
+                contentStyle: { backgroundColor: "#000000" },
             }}
         ></Stack>
     );
