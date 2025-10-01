@@ -1,6 +1,6 @@
 import React, { useState, useCallback } from "react";
-import { View, StyleSheet, Button } from "react-native";
-import { Stack, useRouter, useLocalSearchParams } from "expo-router";
+import { View, StyleSheet, Button, Linking, Alert } from "react-native";
+import { Stack, useRouter } from "expo-router";
 import { StyledText } from "@/components/StyledText";
 import {
 	CameraType,
@@ -10,9 +10,8 @@ import {
 } from "expo-camera";
 import ContentContainer from "@/components/ContentContainer";
 
-export default function CameraScreen() {
+export default function ScanScreen() {
 	const router = useRouter();
-	const { passName } = useLocalSearchParams<{ passName?: string }>();
 	const [facing, setFacing] = useState<CameraType>("back");
 	const [permission, requestPermission] = useCameraPermissions();
 
@@ -20,18 +19,25 @@ export default function CameraScreen() {
 		setFacing((current) => (current === "back" ? "front" : "back"));
 	}, []);
 
-	const handleBarcodeScanned = useCallback((scanningResult: BarcodeScanningResult) => {
+	const handleBarcodeScanned = useCallback(async (scanningResult: BarcodeScanningResult) => {
 		const data = scanningResult.data;
-		const type = scanningResult.type;
-		router.push({
-			pathname: "/add/qrDisplay",
-			params: {
-				scannedData: data,
-				scannedType: type,
-				passName: passName || "",
-			},
-		});
-	}, [router, passName]);
+
+		// Check if the scanned data is a URL
+		if (data.startsWith("http://") || data.startsWith("https://")) {
+			try {
+				const supported = await Linking.canOpenURL(data);
+				if (supported) {
+					await Linking.openURL(data);
+				} else {
+					Alert.alert("Error", "Cannot open this URL");
+				}
+			} catch (error) {
+				Alert.alert("Error", "Failed to open URL");
+			}
+		} else {
+			Alert.alert("Not a URL", `Scanned: ${data}`);
+		}
+	}, []);
 
 	if (!permission) {
 		return <View />;
@@ -52,7 +58,7 @@ export default function CameraScreen() {
 		<>
 			<Stack.Screen />
 			<ContentContainer
-				headerTitle="Add Pass"
+				headerTitle="Scan QR Code"
 				headerIcon="flip-camera-ios"
 				headerIconPress={handleSwapCamera}
 				style={styles.contentContainer}
@@ -62,21 +68,7 @@ export default function CameraScreen() {
 					facing={facing as CameraType}
 					onBarcodeScanned={handleBarcodeScanned}
 					barcodeScannerSettings={{
-						barcodeTypes: [
-							"aztec",
-							"ean13",
-							"ean8",
-							"qr",
-							"pdf417",
-							"upc_e",
-							"datamatrix",
-							"code39",
-							"code93",
-							"itf14",
-							"codabar",
-							"code128",
-							"upc_a",
-						],
+						barcodeTypes: ["qr"],
 					}}
 				/>
 			</ContentContainer>

@@ -1,3 +1,4 @@
+import { StyleSheet } from "react-native";
 import ContentContainer from "@/components/ContentContainer";
 import { ToggleSwitch } from "@/components/ToggleSwitch";
 import { useInvertColors } from "@/contexts/InvertColorsContext";
@@ -9,7 +10,7 @@ export default function SettingsScreen() {
 		<ContentContainer
 			headerTitle="Settings"
 			hideBackButton={true}
-			style={{ gap: 20 }}
+			style={styles.container}
 		>
 			<ToggleSwitch
 				value={invertColors}
@@ -19,3 +20,9 @@ export default function SettingsScreen() {
 		</ContentContainer>
 	);
 }
+
+const styles = StyleSheet.create({
+	container: {
+		gap: 20,
+	},
+});

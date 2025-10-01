@@ -4,6 +4,8 @@ import React, {
 	useState,
 	ReactNode,
 	useEffect,
+	useCallback,
+	useMemo,
 } from "react";
 import * as SecureStore from "expo-secure-store";
 
@@ -78,36 +80,42 @@ export const PassesProvider: React.FC<{ children: ReactNode }> = ({
 		savePasses();
 	}, [passes, isLoading]);
 
-	const addPass = (name: string, data: string, type: string) => {
+	const addPass = useCallback((name: string, data: string, type: string) => {
 		const newPass: Pass = {
-			id: Date.now().toString(), // Simple unique ID
+			id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
 			name,
 			data,
 			type,
 		};
 		setPasses((prevPasses) => [...prevPasses, newPass]);
-	};
+	}, []);
 
-	const getPassById = (id: string): Pass | undefined => {
+	const getPassById = useCallback((id: string): Pass | undefined => {
 		return passes.find((pass) => pass.id === id);
-	};
+	}, [passes]);
 
-	const deletePass = (id: string) => {
+	const deletePass = useCallback((id: string) => {
 		setPasses((prevPasses) => prevPasses.filter((pass) => pass.id !== id));
-	};
+	}, []);
 
-	const updatePassName = (id: string, newName: string) => {
+	const updatePassName = useCallback((id: string, newName: string) => {
 		setPasses((prevPasses) =>
 			prevPasses.map((pass) =>
 				pass.id === id ? { ...pass, name: newName } : pass
 			)
 		);
-	};
+	}, []);
+
+	const contextValue = useMemo(() => ({
+		passes,
+		addPass,
+		getPassById,
+		deletePass,
+		updatePassName,
+	}), [passes, addPass, getPassById, deletePass, updatePassName]);
 
 	return (
-		<PassesContext.Provider
-			value={{ passes, addPass, getPassById, deletePass, updatePassName }}
-		>
+		<PassesContext.Provider value={contextValue}>
 			{children}
 		</PassesContext.Provider>
 	);

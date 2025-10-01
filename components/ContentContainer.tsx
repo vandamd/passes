@@ -1,4 +1,4 @@
-import React, { ReactNode } from "react";
+import React, { ReactNode, useMemo } from "react";
 import { View, StyleSheet, StyleProp, ViewStyle } from "react-native";
 import { Header } from "@/components/Header";
 import { useInvertColors } from "@/contexts/InvertColorsContext";
@@ -16,7 +16,7 @@ interface ContentContainerProps {
 	onTitlePress?: () => void;
 }
 
-export default function ContentContainer({
+const ContentContainer = React.memo(({
 	headerTitle,
 	children,
 	hideBackButton = false,
@@ -26,15 +26,15 @@ export default function ContentContainer({
 	style,
 	backEvent,
 	onTitlePress,
-}: ContentContainerProps) {
+}: ContentContainerProps) => {
 	const { invertColors } = useInvertColors();
+
+	const containerBg = useMemo(() => ({
+		backgroundColor: invertColors ? "white" : "black"
+	}), [invertColors]);
+
 	return (
-		<View
-			style={[
-				styles.container,
-				{ backgroundColor: invertColors ? "white" : "black" },
-			]}
-		>
+		<View style={[styles.container, containerBg]}>
 			{headerTitle && (
 				<Header
 					headerTitle={headerTitle}
@@ -49,7 +49,9 @@ export default function ContentContainer({
 			<View style={[styles.content, style]}>{children ?? null}</View>
 		</View>
 	);
-}
+});
+
+export default ContentContainer;
 
 const styles = StyleSheet.create({
 	container: {
