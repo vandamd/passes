@@ -9,6 +9,7 @@ export const TABS_CONFIG: ReadonlyArray<TabConfigItem> = [
         iconName: "qr-code",
     },
     { name: "Add", screenName: "add/name", iconName: "add-circle-outline" },
+    { name: "Scan", screenName: "scan", iconName: "camera-alt", isExternalRoute: true },
     { name: "Settings", screenName: "settings", iconName: "settings" },
 ] as const;
 
