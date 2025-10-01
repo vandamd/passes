@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useRef } from "react";
 import { View, StyleSheet, Button, Linking, Alert } from "react-native";
 import { Stack, useRouter } from "expo-router";
 import { StyledText } from "@/components/StyledText";
@@ -14,6 +14,9 @@ export default function ScanScreen() {
 	const router = useRouter();
 	const [facing, setFacing] = useState<CameraType>("back");
 	const [permission, requestPermission] = useCameraPermissions();
+	const [isScanning, setIsScanning] = useState(true);
+	const lastScannedRef = useRef<string | null>(null);
+	const scanTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
 	const handleSwapCamera = useCallback(() => {
 		setFacing((current) => (current === "back" ? "front" : "back"));
@@ -21,6 +24,14 @@ export default function ScanScreen() {
 
 	const handleBarcodeScanned = useCallback(async (scanningResult: BarcodeScanningResult) => {
 		const data = scanningResult.data;
+
+		// Prevent duplicate scans
+		if (!isScanning || lastScannedRef.current === data) {
+			return;
+		}
+
+		setIsScanning(false);
+		lastScannedRef.current = data;
 
 		// Check if the scanned data is a URL
 		if (data.startsWith("http://") || data.startsWith("https://")) {
@@ -37,7 +48,16 @@ export default function ScanScreen() {
 		} else {
 			Alert.alert("Not a URL", `Scanned: ${data}`);
 		}
-	}, []);
+
+		// Re-enable scanning after 2 seconds
+		if (scanTimeoutRef.current) {
+			clearTimeout(scanTimeoutRef.current);
+		}
+		scanTimeoutRef.current = setTimeout(() => {
+			setIsScanning(true);
+			lastScannedRef.current = null;
+		}, 2000);
+	}, [isScanning]);
 
 	if (!permission) {
 		return <View />;
@@ -66,7 +86,7 @@ export default function ScanScreen() {
 				<CameraView
 					style={styles.camera}
 					facing={facing as CameraType}
-					onBarcodeScanned={handleBarcodeScanned}
+					onBarcodeScanned={isScanning ? handleBarcodeScanned : undefined}
 					barcodeScannerSettings={{
 						barcodeTypes: ["qr"],
 					}}
