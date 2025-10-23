@@ -39,6 +39,37 @@ const getBwipJsBcid = (expoType: string): string => {
     return BARCODE_TYPE_MAPPING[expoType.toLowerCase()] || expoType;
 };
 
+type BwipRenderOptions = Parameters<typeof toDataURL>[0] & {
+    includestartstop?: boolean;
+};
+
+const CODABAR_SENTINELS = new Set(["A", "B", "C", "D"]);
+
+const ensureCodabarSentinels = (value: string) => {
+    const uppercaseValue = value.toUpperCase();
+
+    const startsWithSentinel =
+        uppercaseValue.length > 0 && CODABAR_SENTINELS.has(uppercaseValue[0]);
+    const endsWithSentinel =
+        uppercaseValue.length > 0 && CODABAR_SENTINELS.has(uppercaseValue[uppercaseValue.length - 1]);
+
+    let sanitizedText = uppercaseValue;
+
+    if (!startsWithSentinel) {
+        sanitizedText = `A${sanitizedText}`;
+    }
+
+    if (!endsWithSentinel) {
+        sanitizedText = `${sanitizedText}A`;
+    }
+
+    return {
+        sanitizedText,
+        altText: uppercaseValue,
+        includeStartStop: startsWithSentinel && endsWithSentinel,
+    };
+};
+
 export default function QRDisplayScreen() {
     const { invertColors } = useInvertColors();
     const router = useRouter();
@@ -51,6 +82,7 @@ export default function QRDisplayScreen() {
         }>();
     const { addPass, getPassById, deletePass } = usePasses();
     const [barcodeSource, setBarcodeSource] = useState<DataURL | null>(null);
+    const [barcodeError, setBarcodeError] = useState<string | null>(null);
     const [scaledSize, setScaledSize] = useState({ width: 0, height: 0 });
     const [viewSize, setViewSize] = useState({ width: 0, height: 0 });
     const existingPass = passId ? getPassById(passId) : undefined;
@@ -87,15 +119,27 @@ export default function QRDisplayScreen() {
         if (currentData && currentType) {
             const bcidForBwipJs = getBwipJsBcid(currentType);
 
-            const bwipJsOptions = {
+            const bwipJsOptions: BwipRenderOptions = {
                 bcid: bcidForBwipJs,
                 text: currentData,
                 scale: PixelRatio.get() * 2,
                 includetext: true,
-                textxalign: "center" as "center",
+                textxalign: "center",
                 barcolor: "000000",
                 backgroundcolor: "FFFFFF",
             };
+
+            if (bcidForBwipJs === "rationalizedCodabar") {
+                const { sanitizedText, altText, includeStartStop } = ensureCodabarSentinels(
+                    currentData
+                );
+
+                bwipJsOptions.text = sanitizedText;
+                bwipJsOptions.alttext = altText || sanitizedText;
+                bwipJsOptions.includestartstop = includeStartStop;
+            }
+
+            setBarcodeError(null);
 
             toDataURL(bwipJsOptions)
                 .then(result => {
@@ -109,11 +153,13 @@ export default function QRDisplayScreen() {
                             "bwip-js toDataURL error:",
                             err.message ? err.message : err
                         );
+                        setBarcodeError("Unable to render barcode. Please try again.");
                         setBarcodeSource(null);
                     }
                 });
         } else {
             setBarcodeSource(null);
+            setBarcodeError(null);
         }
 
         return () => {
@@ -186,6 +232,10 @@ export default function QRDisplayScreen() {
                                 style={imageStyle}
                                 source={{ uri: barcodeSource.uri }}
                             />
+                        ) : barcodeError ? (
+                            <StyledText style={styles.loadingText}>
+                                {barcodeError}
+                            </StyledText>
                         ) : (
                             <StyledText style={styles.loadingText}>
                                 {currentData
