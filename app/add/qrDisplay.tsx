@@ -6,6 +6,7 @@ import { usePasses } from "@/contexts/PassesContext";
 import { toDataURL, type DataURL } from "@bwip-js/react-native";
 import ContentContainer from "@/components/ContentContainer";
 import { useInvertColors } from "@/contexts/InvertColorsContext";
+import { normalizedSize } from "@/utils/fontScaling";
 
 const BARCODE_TYPE_MAPPING: Readonly<Record<string, string>> = {
     aztec: "azteccode",
@@ -35,12 +36,55 @@ const ONE_DIMENSIONAL_CODES = [
     "upca",
 ] as const;
 
-const getBwipJsBcid = (expoType: string): string => {
+/**
+ * Determine the best Aztec code type based on data characteristics
+ * - Rune: pure integer 0-255
+ * - Compact: up to ~89 chars (will fall back to full if encoding fails)
+ * - Full: larger data
+ */
+const getAztecBcid = (data: string): string => {
+    // Check for Aztec Rune: pure integer 0-255
+    const asNumber = parseInt(data, 10);
+    if (!isNaN(asNumber) && asNumber >= 0 && asNumber <= 255 && String(asNumber) === data) {
+        return "aztecrune";
+    }
+
+    // Try compact for smaller data (up to ~89 chars)
+    if (data.length <= 89) {
+        return "azteccodecompact";
+    }
+
+    // Full Aztec for larger data
+    return "azteccode";
+};
+
+const getBwipJsBcid = (expoType: string, data: string): string => {
+    if (expoType.toLowerCase() === "aztec") {
+        return getAztecBcid(data);
+    }
     return BARCODE_TYPE_MAPPING[expoType.toLowerCase()] || expoType;
 };
 
 type BwipRenderOptions = Parameters<typeof toDataURL>[0] & {
     includestartstop?: boolean;
+};
+
+/**
+ * Generate barcode with fallback for compact Aztec → full Aztec
+ */
+const generateBarcode = async (
+    bcid: string,
+    options: Omit<BwipRenderOptions, "bcid">
+): Promise<DataURL> => {
+    try {
+        return await toDataURL({ ...options, bcid });
+    } catch (err) {
+        // If compact Aztec fails, fall back to full
+        if (bcid === "azteccodecompact") {
+            return await toDataURL({ ...options, bcid: "azteccode" });
+        }
+        throw err;
+    }
 };
 
 const CODABAR_SENTINELS = new Set(["A", "B", "C", "D"]);
@@ -117,10 +161,9 @@ export default function QRDisplayScreen() {
         let cancelled = false;
 
         if (currentData && currentType) {
-            const bcidForBwipJs = getBwipJsBcid(currentType);
+            const bcidForBwipJs = getBwipJsBcid(currentType, currentData);
 
-            const bwipJsOptions: BwipRenderOptions = {
-                bcid: bcidForBwipJs,
+            const bwipJsOptions: Omit<BwipRenderOptions, "bcid"> = {
                 text: currentData,
                 scale: PixelRatio.get() * 2,
                 includetext: true,
@@ -141,7 +184,7 @@ export default function QRDisplayScreen() {
 
             setBarcodeError(null);
 
-            toDataURL(bwipJsOptions)
+            generateBarcode(bcidForBwipJs, bwipJsOptions)
                 .then(result => {
                     if (!cancelled) {
                         setBarcodeSource(result);
@@ -258,8 +301,8 @@ const styles = StyleSheet.create({
         width: "100%",
     },
     qrContainer: {
-        padding: 20,
-        marginBottom: 20,
+        padding: normalizedSize(20),
+        marginBottom: normalizedSize(20),
         backgroundColor: "white",
         alignItems: "center",
         justifyContent: "center",

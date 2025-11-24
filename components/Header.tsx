@@ -5,6 +5,7 @@ import { router } from "expo-router";
 import { StyledText } from "./StyledText";
 import { HapticPressable } from "./HapticPressable";
 import { useInvertColors } from "@/contexts/InvertColorsContext";
+import { scaledFontSize, normalizedSize } from "@/utils/fontScaling";
 
 interface HeaderProps {
     iconName?: keyof typeof MaterialIcons.glyphMap;
@@ -48,7 +49,7 @@ export const Header = React.memo(({
                     <View style={styles.iconContainerLeft}>
                         <MaterialIcons
                             name="arrow-back-ios"
-                            size={28}
+                            size={normalizedSize(28)}
                             color={iconColor}
                         />
                     </View>
@@ -73,7 +74,7 @@ export const Header = React.memo(({
                     <View style={styles.iconContainerRight}>
                         <MaterialIcons
                             name={iconName}
-                            size={28}
+                            size={normalizedSize(28)}
                             color={iconColor}
                         />
                     </View>
@@ -90,14 +91,14 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         alignItems: "center",
         justifyContent: "space-between",
-        paddingHorizontal: 22,
-        paddingVertical: 5,
+        paddingHorizontal: normalizedSize(22),
+        paddingVertical: normalizedSize(5),
         zIndex: 1,
     },
     title: {
-        fontSize: 20,
+        fontSize: scaledFontSize(20),
         fontFamily: "PublicSans-Regular",
-        paddingTop: 2,
+        paddingTop: normalizedSize(2),
         maxWidth: "75%",
     },
     titleContainer: {
@@ -106,17 +107,17 @@ const styles = StyleSheet.create({
         justifyContent: "center",
     },
     iconContainerLeft: {
-        width: 32,
-        height: 32,
+        width: normalizedSize(32),
+        height: normalizedSize(32),
         alignItems: "center",
-        paddingTop: 6,
-        paddingRight: 4,
+        paddingTop: normalizedSize(6),
+        paddingRight: normalizedSize(4),
     },
     iconContainerRight: {
-        width: 32,
-        height: 32,
+        width: normalizedSize(32),
+        height: normalizedSize(32),
         alignItems: "center",
-        paddingTop: 6,
-        paddingLeft: 4,
+        paddingTop: normalizedSize(6),
+        paddingLeft: normalizedSize(4),
     },
 });

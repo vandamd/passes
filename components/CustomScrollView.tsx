@@ -9,6 +9,7 @@ import {
 	NativeScrollEvent,
 } from "react-native";
 import { useInvertColors } from "@/contexts/InvertColorsContext";
+import { normalizedSize } from "@/utils/fontScaling";
 
 interface CustomScrollViewProps extends ScrollViewProps {
 	// We can add any custom props here if needed in the future
@@ -114,18 +115,18 @@ const styles = StyleSheet.create({
 		width: "100%",
 	},
 	scrollIndicatorTrack: {
-		width: 1,
+		width: normalizedSize(1),
 		height: "100%",
 		position: "absolute",
-		right: -18,
+		right: normalizedSize(-18),
 	},
 	trackTransform: {
-		transform: [{ translateX: 1 }],
+		transform: [{ translateX: normalizedSize(1) }],
 	},
 	scrollIndicatorThumb: {
-		width: 5,
+		width: normalizedSize(5),
 		position: "absolute",
-		right: -2,
+		right: normalizedSize(-2),
 	},
 });
 

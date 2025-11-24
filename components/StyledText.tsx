@@ -15,6 +15,7 @@ export const StyledText = React.memo(({ style, ...rest }: StyledTextProps) => {
 
     return (
         <DefaultText
+            allowFontScaling={false}
             style={[
                 styles.text,
                 textColor,

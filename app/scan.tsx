@@ -9,6 +9,7 @@ import {
 	BarcodeScanningResult,
 } from "expo-camera";
 import ContentContainer from "@/components/ContentContainer";
+import { normalizedSize } from "@/utils/fontScaling";
 
 export default function ScanScreen() {
 	const router = useRouter();
@@ -104,7 +105,7 @@ const styles = StyleSheet.create({
 	permissionText: {
 		textAlign: "center",
 		color: "white",
-		marginBottom: 10,
+		marginBottom: normalizedSize(10),
 	},
 	contentContainer: {
 		paddingHorizontal: 0,

@@ -5,6 +5,7 @@ import { HapticPressable } from "./HapticPressable";
 import type { BottomTabBarProps } from "@react-navigation/bottom-tabs";
 import { useInvertColors } from "@/contexts/InvertColorsContext";
 import { useRouter } from "expo-router";
+import { normalizedSize } from "@/utils/fontScaling";
 
 export interface TabConfigItem {
 	name: string;
@@ -42,7 +43,7 @@ const NavItem = React.memo(({
 		<HapticPressable onPress={onPress}>
 			<MaterialIcons
 				name={tab.iconName}
-				size={48}
+				size={normalizedSize(48)}
 				color={iconColor}
 			/>
 		</HapticPressable>
@@ -89,7 +90,7 @@ const styles = StyleSheet.create({
 		flexDirection: "row",
 		alignItems: "center",
 		justifyContent: "space-between",
-		paddingVertical: 11,
-		paddingHorizontal: 20,
+		paddingVertical: normalizedSize(11),
+		paddingHorizontal: normalizedSize(20),
 	},
 });

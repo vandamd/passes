@@ -7,6 +7,7 @@ import { MaterialIcons } from "@expo/vector-icons";
 import { HapticPressable } from "@/components/HapticPressable";
 import * as Haptics from "expo-haptics";
 import { usePasses } from "@/contexts/PassesContext";
+import { scaledFontSize, normalizedSize } from "@/utils/fontScaling";
 
 export default function RenamePassScreen() {
     const { invertColors } = useInvertColors();
@@ -36,7 +37,7 @@ export default function RenamePassScreen() {
                 headerIcon="check"
                 headerIconPress={handleSave}
                 headerIconShowLength={passName.length}
-                style={{ gap: 32 }}
+                style={{ gap: normalizedSize(32) }}
             >
                 <View
                     style={[
@@ -70,7 +71,7 @@ export default function RenamePassScreen() {
                         >
                             <MaterialIcons
                                 name="clear"
-                                size={24}
+                                size={normalizedSize(24)}
                                 color={invertColors ? "black" : "white"}
                             />
                         </HapticPressable>
@@ -86,17 +87,17 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         alignItems: "center",
         width: "100%",
-        borderBottomWidth: 1,
+        borderBottomWidth: normalizedSize(1),
     },
     input: {
         flex: 1,
-        fontSize: 24,
+        fontSize: scaledFontSize(24),
         fontFamily: "PublicSans-Regular",
-        paddingVertical: 2,
+        paddingVertical: normalizedSize(2),
         textAlign: "left",
-        paddingBottom: 6,
+        paddingBottom: normalizedSize(6),
     },
     clearButton: {
-        padding: 5,
+        padding: normalizedSize(5),
     },
 });
