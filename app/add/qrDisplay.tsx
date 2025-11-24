@@ -6,6 +6,7 @@ import { usePasses } from "@/contexts/PassesContext";
 import { toDataURL, type DataURL } from "@bwip-js/react-native";
 import ContentContainer from "@/components/ContentContainer";
 import { useInvertColors } from "@/contexts/InvertColorsContext";
+import { normalizedSize } from "@/utils/fontScaling";
 
 const BARCODE_TYPE_MAPPING: Readonly<Record<string, string>> = {
     aztec: "azteccode",
@@ -258,8 +259,8 @@ const styles = StyleSheet.create({
         width: "100%",
     },
     qrContainer: {
-        padding: 20,
-        marginBottom: 20,
+        padding: normalizedSize(20),
+        marginBottom: normalizedSize(20),
         backgroundColor: "white",
         alignItems: "center",
         justifyContent: "center",

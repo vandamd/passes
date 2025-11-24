@@ -3,6 +3,7 @@ import { View, StyleSheet } from "react-native";
 import { StyledText } from "./StyledText";
 import { HapticPressable } from "./HapticPressable";
 import { useInvertColors } from "@/contexts/InvertColorsContext";
+import { scaledFontSize, normalizedSize } from "@/utils/fontScaling";
 
 interface ToggleSwitchGraphicProps {
 	value: boolean;
@@ -10,10 +11,10 @@ interface ToggleSwitchGraphicProps {
 	color?: string;
 }
 
-const CIRCLE_DIAMETER = 9.8;
-const CIRCLE_BORDER = 2.5;
-const LINE_WIDTH = 14.5;
-const LINE_HEIGHT = 2.22;
+const CIRCLE_DIAMETER = normalizedSize(9.8);
+const CIRCLE_BORDER = normalizedSize(2.5);
+const LINE_WIDTH = normalizedSize(14.5);
+const LINE_HEIGHT = normalizedSize(2.22);
 
 const graphicBaseStyles = StyleSheet.create({
 	container: {
@@ -103,17 +104,17 @@ const styles = StyleSheet.create({
 	container: {
 		flexDirection: "row",
 		alignItems: "center",
-		paddingTop: 9,
+		paddingTop: normalizedSize(9),
 	},
 	switchTouchable: {
-		marginTop: 12,
-		marginRight: 20,
-		marginLeft: 8.5,
+		marginTop: normalizedSize(12),
+		marginRight: normalizedSize(20),
+		marginLeft: normalizedSize(8.5),
 	},
 	textTouchable: {
 		flex: 1,
 	},
 	label: {
-		fontSize: 30,
+		fontSize: scaledFontSize(30),
 	},
 });

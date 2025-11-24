@@ -6,6 +6,7 @@ import { useInvertColors } from "@/contexts/InvertColorsContext";
 import { MaterialIcons } from "@expo/vector-icons";
 import { HapticPressable } from "@/components/HapticPressable";
 import * as Haptics from "expo-haptics";
+import { scaledFontSize, normalizedSize } from "@/utils/fontScaling";
 
 export default function NamePassScreen() {
 	const { invertColors } = useInvertColors();
@@ -28,7 +29,7 @@ export default function NamePassScreen() {
 	}, []);
 
 	const dynamicStyles = useMemo(() => ({
-		container: { gap: 32 },
+		container: { gap: normalizedSize(32) },
 		inputContainerBorder: { borderBottomColor: invertColors ? "black" : "white" },
 		inputText: { color: invertColors ? "black" : "white" },
 	}), [invertColors]);
@@ -65,7 +66,7 @@ export default function NamePassScreen() {
 						>
 							<MaterialIcons
 								name="clear"
-								size={24}
+								size={normalizedSize(24)}
 								color={iconColor}
 							/>
 						</HapticPressable>
@@ -81,17 +82,17 @@ const styles = StyleSheet.create({
 		flexDirection: "row",
 		alignItems: "center",
 		width: "100%",
-		borderBottomWidth: 1,
+		borderBottomWidth: normalizedSize(1),
 	},
 	input: {
 		flex: 1,
-		fontSize: 24,
+		fontSize: scaledFontSize(24),
 		fontFamily: "PublicSans-Regular",
-		paddingVertical: 2,
+		paddingVertical: normalizedSize(2),
 		textAlign: "left",
-		paddingBottom: 6,
+		paddingBottom: normalizedSize(6),
 	},
 	clearButton: {
-		padding: 5,
+		padding: normalizedSize(5),
 	},
 });

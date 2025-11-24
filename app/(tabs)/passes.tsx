@@ -6,6 +6,7 @@ import { usePasses } from "@/contexts/PassesContext";
 import { StyledButton } from "@/components/StyledButton";
 import { View, StyleSheet } from "react-native";
 import { Pass } from "@/contexts/PassesContext";
+import { normalizedSize } from "@/utils/fontScaling";
 
 export default function PassesScreen() {
     const { passes } = usePasses();
@@ -43,9 +44,9 @@ export default function PassesScreen() {
 
 const styles = StyleSheet.create({
     container: {
-        gap: 20,
+        gap: normalizedSize(20),
     },
     passItem: {
-        marginBottom: 15,
+        marginBottom: normalizedSize(15),
     },
 });
