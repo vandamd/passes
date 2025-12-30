@@ -8,11 +8,7 @@
         "newArchEnabled": true,
         "icon": "./assets/images/icon.png",
         "android": {
-            "package": "com.vandamd.passes",
-            "adaptiveIcon": {
-                "foregroundImage": "./assets/images/icon.png",
-                "backgroundColor": "#000000"
-            }
+            "package": "com.vandamd.passes"
         },
         "plugins": ["expo-router", "expo-secure-store"],
         "experiments": {
