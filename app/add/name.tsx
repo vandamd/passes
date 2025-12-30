@@ -9,90 +9,89 @@ import * as Haptics from "expo-haptics";
 import { scaledFontSize, normalizedSize } from "@/utils/fontScaling";
 
 export default function NamePassScreen() {
-	const { invertColors } = useInvertColors();
-	const [passName, setPassName] = useState("");
-	const router = useRouter();
+    const { invertColors } = useInvertColors();
+    const [passName, setPassName] = useState("");
+    const router = useRouter();
 
-	useFocusEffect(
-		useCallback(() => {
-			setPassName("");
-		}, [])
-	);
+    useFocusEffect(
+        useCallback(() => {
+            setPassName("");
+        }, [])
+    );
 
-	const handleNext = useCallback(() => {
-		router.push({ pathname: "/add/camera", params: { passName } });
-	}, [router, passName]);
+    const handleNext = useCallback(() => {
+        router.push({ pathname: "/add/camera", params: { passName } });
+    }, [router, passName]);
 
-	const handleClear = useCallback(() => {
-		setPassName("");
-		Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-	}, []);
+    const handleClear = useCallback(() => {
+        setPassName("");
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    }, []);
 
-	const dynamicStyles = useMemo(() => ({
-		container: { gap: normalizedSize(32) },
-		inputContainerBorder: { borderBottomColor: invertColors ? "black" : "white" },
-		inputText: { color: invertColors ? "black" : "white" },
-	}), [invertColors]);
+    const dynamicStyles = useMemo(() => ({
+        container: { gap: normalizedSize(32) },
+        inputContainerBorder: { borderBottomColor: invertColors ? "black" : "white" },
+        inputText: { color: invertColors ? "black" : "white" },
+    }), [invertColors]);
 
-	const cursorColor = invertColors ? "black" : "white";
-	const iconColor = invertColors ? "black" : "white";
+    const cursorColor = invertColors ? "black" : "white";
+    const iconColor = invertColors ? "black" : "white";
 
-	return (
-		<>
-			<Stack.Screen />
-			<ContentContainer
-				headerTitle="Name Pass"
-				headerIcon="check"
-				headerIconPress={handleNext}
-				headerIconShowLength={passName.length}
-				style={dynamicStyles.container}
-			>
-				<View style={[styles.inputContainer, dynamicStyles.inputContainerBorder]}>
-					<TextInput
-						style={[styles.input, dynamicStyles.inputText]}
-						placeholderTextColor="#888"
-						value={passName}
-						placeholder="Pass Name"
-						onChangeText={setPassName}
-						autoFocus={true}
-						cursorColor={cursorColor}
-						selectionColor={cursorColor}
-						onSubmitEditing={handleNext}
-					/>
-					{passName.length > 0 && (
-						<HapticPressable
-							style={styles.clearButton}
-							onPress={handleClear}
-						>
-							<MaterialIcons
-								name="clear"
-								size={normalizedSize(24)}
-								color={iconColor}
-							/>
-						</HapticPressable>
-					)}
-				</View>
-			</ContentContainer>
-		</>
-	);
+    return (
+        <>
+            <Stack.Screen />
+            <ContentContainer
+                headerTitle="Name Pass"
+                headerIcon="check"
+                headerIconPress={handleNext}
+                headerIconShowLength={passName.length}
+                style={dynamicStyles.container}
+            >
+                <View style={[styles.inputContainer, dynamicStyles.inputContainerBorder]}>
+                    <TextInput
+                        style={[styles.input, dynamicStyles.inputText]}
+                        placeholderTextColor="#888"
+                        value={passName}
+                        placeholder="Pass Name"
+                        onChangeText={setPassName}
+                        autoFocus={true}
+                        cursorColor={cursorColor}
+                        selectionColor={cursorColor}
+                        onSubmitEditing={handleNext}
+                    />
+                    <HapticPressable
+                        style={[styles.clearButton, { opacity: passName.length > 0 ? 1 : 0 }]}
+                        onPress={handleClear}
+                        disabled={passName.length === 0}
+                    >
+                        <MaterialIcons
+                            name="clear"
+                            size={normalizedSize(24)}
+                            color={iconColor}
+                        />
+                    </HapticPressable>
+                </View>
+            </ContentContainer>
+        </>
+    );
 }
 
 const styles = StyleSheet.create({
-	inputContainer: {
-		flexDirection: "row",
-		alignItems: "center",
-		width: "100%",
-		borderBottomWidth: normalizedSize(1),
-	},
-	input: {
-		flex: 1,
-		fontSize: scaledFontSize(24),
-		fontFamily: "PublicSans-Regular",
-		paddingVertical: normalizedSize(2),
-		textAlign: "left",
-		paddingBottom: normalizedSize(6),
-	},
-	clearButton: {
-		padding: normalizedSize(5),
-	},
+    inputContainer: {
+        flexDirection: "row",
+        alignItems: "center",
+        width: "100%",
+        borderBottomWidth: normalizedSize(1),
+    },
+    input: {
+        flex: 1,
+        fontSize: scaledFontSize(24),
+        fontFamily: "PublicSans-Regular",
+        paddingVertical: normalizedSize(2),
+        textAlign: "left",
+        paddingBottom: normalizedSize(6),
+    },
+    clearButton: {
+        padding: normalizedSize(5),
+    },
 });
