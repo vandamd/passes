@@ -2,7 +2,7 @@
     "expo": {
         "name": "Passes",
         "slug": "passes",
-        "version": "2.2.2",
+        "version": "2.2.3",
         "orientation": "portrait",
         "scheme": "passes",
         "newArchEnabled": true,
