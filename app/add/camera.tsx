@@ -107,7 +107,6 @@ const styles = StyleSheet.create({
     },
     contentContainer: {
         paddingHorizontal: 0,
-        paddingTop: 0,
         gap: 0,
     },
     cameraContainer: {
