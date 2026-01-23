@@ -1,8 +1,9 @@
 import React, { useState, useCallback, useRef } from "react";
-import { View, StyleSheet, Button } from "react-native";
+import { View, StyleSheet } from "react-native";
 import { useRouter } from "expo-router";
 import { StyledText } from "@/components/StyledText";
-import { useCameraPermissions } from "expo-camera";
+import { HapticPressable } from "@/components/HapticPressable";
+import { useCameraPermissions } from "@/modules/expo-barcode-scanner";
 import ContentContainer from "@/components/ContentContainer";
 import { useInvertColors } from "@/contexts/InvertColorsContext";
 import { n } from "@/utils/scaling";
@@ -50,11 +51,15 @@ export default function CameraScreen() {
         const textColor = invertColors ? "black" : "white";
         return (
             <ContentContainer headerTitle="Add Pass">
-                <View style={styles.permissionContainer}>
-                    <StyledText style={[styles.permissionText, { color: textColor }]}>
-                        We need your permission to show the camera
-                    </StyledText>
-                    <Button onPress={requestPermission} title="Grant Permission" />
+                <StyledText style={styles.messageText}>
+                    We need your permission to use the camera
+                </StyledText>
+                <View style={styles.buttonContainer}>
+                    <HapticPressable onPress={requestPermission} style={styles.button}>
+                        <StyledText style={[styles.buttonText, { color: textColor }]}>
+                            Grant
+                        </StyledText>
+                    </HapticPressable>
                 </View>
             </ContentContainer>
         );
@@ -79,14 +84,26 @@ export default function CameraScreen() {
 }
 
 const styles = StyleSheet.create({
-    permissionContainer: {
+    messageText: {
+        fontSize: n(18),
+        marginTop: n(10),
+    },
+    buttonContainer: {
+        width: "100%",
         flex: 1,
-        justifyContent: "center",
+        justifyContent: "flex-end",
         alignItems: "center",
     },
-    permissionText: {
-        textAlign: "center",
-        marginBottom: n(10),
+    button: {
+        paddingVertical: n(15),
+        paddingHorizontal: n(30),
+        alignItems: "center",
+        justifyContent: "flex-end",
+        minWidth: n(200),
+    },
+    buttonText: {
+        fontSize: n(40),
+        textTransform: "uppercase",
     },
     contentContainer: {
         paddingHorizontal: 0,

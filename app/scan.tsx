@@ -1,12 +1,12 @@
 import React, { useState, useCallback, useRef } from "react";
-import { View, StyleSheet, Button, Linking, Alert } from "react-native";
+import { View, StyleSheet, Linking, Alert } from "react-native";
 import { StyledText } from "@/components/StyledText";
+import { HapticPressable } from "@/components/HapticPressable";
 import {
-    CameraType,
-    CameraView,
+    ExpoBarcodeScannerView,
     useCameraPermissions,
-    BarcodeScanningResult,
-} from "expo-camera";
+    BarcodeResult,
+} from "@/modules/expo-barcode-scanner";
 import ContentContainer from "@/components/ContentContainer";
 import { useInvertColors } from "@/contexts/InvertColorsContext";
 import { n } from "@/utils/scaling";
@@ -24,25 +24,25 @@ const isValidUrl = (url: string): boolean => {
 
 export default function ScanScreen() {
     const { invertColors } = useInvertColors();
-    const [facing, setFacing] = useState<CameraType>("back");
+    const [facing, setFacing] = useState<"front" | "back">("back");
     const [permission, requestPermission] = useCameraPermissions();
-    const [isScanning, setIsScanning] = useState(true);
     const lastScannedRef = useRef<string | null>(null);
     const scanTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const isCooldownRef = useRef(false);
 
     const handleSwapCamera = useCallback(() => {
         setFacing((current) => (current === "back" ? "front" : "back"));
     }, []);
 
     const handleBarcodeScanned = useCallback(
-        async (scanningResult: BarcodeScanningResult) => {
-            const data = scanningResult.data;
+        async (event: { nativeEvent: BarcodeResult }) => {
+            const data = event.nativeEvent.data;
 
-            if (!isScanning || lastScannedRef.current === data) {
+            if (isCooldownRef.current || lastScannedRef.current === data) {
                 return;
             }
 
-            setIsScanning(false);
+            isCooldownRef.current = true;
             lastScannedRef.current = data;
 
             if (isValidUrl(data)) {
@@ -64,11 +64,11 @@ export default function ScanScreen() {
                 clearTimeout(scanTimeoutRef.current);
             }
             scanTimeoutRef.current = setTimeout(() => {
-                setIsScanning(true);
+                isCooldownRef.current = false;
                 lastScannedRef.current = null;
             }, SCAN_COOLDOWN_MS);
         },
-        [isScanning]
+        []
     );
 
     if (!permission) {
@@ -79,11 +79,15 @@ export default function ScanScreen() {
         const textColor = invertColors ? "black" : "white";
         return (
             <ContentContainer headerTitle="Scan QR Code">
-                <View style={styles.permissionContainer}>
-                    <StyledText style={[styles.permissionText, { color: textColor }]}>
-                        We need your permission to show the camera
-                    </StyledText>
-                    <Button onPress={requestPermission} title="Grant Permission" />
+                <StyledText style={styles.messageText}>
+                    We need your permission to use the camera
+                </StyledText>
+                <View style={styles.buttonContainer}>
+                    <HapticPressable onPress={requestPermission} style={styles.button}>
+                        <StyledText style={[styles.buttonText, { color: textColor }]}>
+                            Grant
+                        </StyledText>
+                    </HapticPressable>
                 </View>
             </ContentContainer>
         );
@@ -96,27 +100,36 @@ export default function ScanScreen() {
             onRightIconPress={handleSwapCamera}
             style={styles.contentContainer}
         >
-            <CameraView
+            <ExpoBarcodeScannerView
                 style={styles.camera}
                 facing={facing}
-                onBarcodeScanned={isScanning ? handleBarcodeScanned : undefined}
-                barcodeScannerSettings={{
-                    barcodeTypes: ["qr"],
-                }}
+                onBarcodeScanned={handleBarcodeScanned}
             />
         </ContentContainer>
     );
 }
 
 const styles = StyleSheet.create({
-    permissionContainer: {
+    messageText: {
+        fontSize: n(18),
+        marginTop: n(10),
+    },
+    buttonContainer: {
+        width: "100%",
         flex: 1,
-        justifyContent: "center",
+        justifyContent: "flex-end",
         alignItems: "center",
     },
-    permissionText: {
-        textAlign: "center",
-        marginBottom: n(10),
+    button: {
+        paddingVertical: n(15),
+        paddingHorizontal: n(30),
+        alignItems: "center",
+        justifyContent: "flex-end",
+        minWidth: n(200),
+    },
+    buttonText: {
+        fontSize: n(40),
+        textTransform: "uppercase",
     },
     contentContainer: {
         paddingHorizontal: 0,

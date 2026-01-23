@@ -16,13 +16,7 @@
       "expo-font",
       "./plugins/withAndroidConfigChanges",
       "./plugins/withAndroidTheme",
-      "expo-secure-store",
-      [
-        "expo-camera",
-        {
-          "cameraPermission": "Allow Passes to scan barcodes"
-        }
-      ]
+      "expo-secure-store"
     ],
     "experiments": {
       "typedRoutes": true
