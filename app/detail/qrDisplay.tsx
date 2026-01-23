@@ -38,6 +38,7 @@ export default function QRDisplayScreen() {
 
     const existingPass = passId ? getPassById(passId) : undefined;
     const currentData = existingPass ? existingPass.data : scannedData;
+    const currentRawData = existingPass?.rawData ?? scannedRawData;
     const currentType = existingPass ? existingPass.type : scannedType || "qr";
     const currentPassName = existingPass ? existingPass.name : passName;
 
@@ -65,8 +66,8 @@ export default function QRDisplayScreen() {
     useEffect(() => {
         let cancelled = false;
 
-        if (currentData && currentType) {
-            const cacheKey = `${currentType}:${currentData}`;
+        if ((currentData || currentRawData) && currentType) {
+            const cacheKey = `${currentType}:${currentRawData || currentData}:${currentRawData ? "raw" : "text"}`;
             const cached = getCachedBarcode(cacheKey);
 
             if (cached) {
@@ -74,8 +75,8 @@ export default function QRDisplayScreen() {
                 return;
             }
 
-            const bcid = getBwipJsBcid(currentType, currentData);
-            const options = buildBarcodeOptions(bcid, currentData);
+            const bcid = getBwipJsBcid(currentType, currentData || "");
+            const options = buildBarcodeOptions(bcid, currentData || "", currentRawData);
 
             setBarcodeError(null);
 
@@ -101,18 +102,18 @@ export default function QRDisplayScreen() {
         return () => {
             cancelled = true;
         };
-    }, [currentData, currentType]);
+    }, [currentData, currentRawData, currentType]);
 
     const handleSavePassAndGoHome = useCallback(() => {
-        if (currentData && currentPassName && !existingPass && !hasAddedPassRef.current) {
+        if ((currentData || currentRawData) && currentPassName && !existingPass && !hasAddedPassRef.current) {
             const validatedType: BarcodeType | undefined = isValidBarcodeType(scannedType) ? scannedType : undefined;
             if (validatedType) {
                 hasAddedPassRef.current = true;
-                addPass(currentPassName, currentData, validatedType, scannedRawData);
+                addPass(currentPassName, currentData || "", validatedType, scannedRawData);
             }
         }
         router.replace("/");
-    }, [existingPass, scannedType, scannedRawData, currentData, currentPassName, addPass, router]);
+    }, [existingPass, scannedType, scannedRawData, currentData, currentRawData, currentPassName, addPass, router]);
 
     const handleDeletePress = useCallback(() => {
         if (existingPass) {
@@ -171,12 +172,12 @@ export default function QRDisplayScreen() {
     );
 
     useEffect(() => {
-        if (!currentData) {
+        if (!currentData && !currentRawData) {
             router.replace("/");
         }
-    }, [currentData, router]);
+    }, [currentData, currentRawData, router]);
 
-    if (!currentData) {
+    if (!currentData && !currentRawData) {
         return null;
     }
 
@@ -198,7 +199,7 @@ export default function QRDisplayScreen() {
                         <StyledText style={styles.loadingText}>{barcodeError}</StyledText>
                     ) : (
                         <StyledText style={styles.loadingText}>
-                            {currentData ? `Generating ${currentType.toUpperCase()} Code...` : "No data for Barcode"}
+                            {currentData || currentRawData ? `Generating ${currentType.toUpperCase()} Code...` : "No data for Barcode"}
                         </StyledText>
                     )}
                 </View>

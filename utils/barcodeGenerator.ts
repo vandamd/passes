@@ -19,6 +19,10 @@ const BARCODE_TYPE_MAPPING: Readonly<Record<string, string>> = {
 };
 
 const getAztecBcid = (data: string): string => {
+    // Empty data means binary-only - use full azteccode
+    if (data.length === 0) {
+        return "azteccode";
+    }
     const asNumber = parseInt(data, 10);
     if (!isNaN(asNumber) && asNumber >= 0 && asNumber <= 255 && String(asNumber) === data) {
         return "aztecrune";
@@ -38,6 +42,15 @@ export const getBwipJsBcid = (expoType: string, data: string): string => {
 
 type BwipRenderOptions = Parameters<typeof toDataURL>[0] & {
     includestartstop?: boolean;
+    binarytext?: boolean;
+};
+
+const decodeBase64ToBinaryString = (base64: string): string | null => {
+    try {
+        return atob(base64);
+    } catch {
+        return null;
+    }
 };
 
 export const generateBarcode = async (
@@ -76,14 +89,17 @@ export const ensureCodabarSentinels = (value: string) => {
     };
 };
 
-export const buildBarcodeOptions = (bcid: string, data: string): Omit<BwipRenderOptions, "bcid"> => {
+export const buildBarcodeOptions = (bcid: string, data: string, rawData?: string): Omit<BwipRenderOptions, "bcid"> => {
+    const decodedBinary = rawData ? decodeBase64ToBinaryString(rawData) : null;
+
     const options: Omit<BwipRenderOptions, "bcid"> = {
-        text: data,
+        text: decodedBinary || data,
         scale: PixelRatio.get() * 2,
-        includetext: true,
+        includetext: !decodedBinary,
         textxalign: "center",
         barcolor: "000000",
         backgroundcolor: "FFFFFF",
+        binarytext: !!decodedBinary,
     };
 
     if (bcid === "rationalizedCodabar") {

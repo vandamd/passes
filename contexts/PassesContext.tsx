@@ -109,9 +109,7 @@ export const PassesProvider: React.FC<{ children: ReactNode }> = ({ children }) 
     }, []);
 
     const getPassById = useCallback(
-        (id: string) => {
-            return passes.find((pass) => pass.id === id);
-        },
+        (id: string) => passes.find((pass) => pass.id === id),
         [passes]
     );
 

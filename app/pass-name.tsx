@@ -38,7 +38,7 @@ export default function PassNameScreen() {
         if (isRenameMode && passId && passName.trim()) {
             updatePassName(passId, passName.trim());
             router.back();
-        } else if (!isRenameMode && scannedData && scannedType) {
+        } else if (!isRenameMode && (scannedData || scannedRawData) && scannedType) {
             router.push({
                 pathname: "/detail/qrDisplay",
                 params: {
