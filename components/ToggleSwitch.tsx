@@ -77,16 +77,14 @@ export function ToggleSwitch({
 }: ToggleSwitchProps) {
     return (
         <HapticPressable
-            onPress={() => {
-                onValueChange(!value);
-            }}
-            style={[styles.container]}
+            onPress={() => onValueChange(!value)}
+            style={styles.container}
         >
             <View style={styles.switchTouchable}>
                 <ToggleSwitchGraphic value={value} color={color} />
             </View>
             <View style={styles.textTouchable}>
-                <StyledText style={[styles.label]}>{label}</StyledText>
+                <StyledText style={styles.label}>{label}</StyledText>
             </View>
         </HapticPressable>
     );
