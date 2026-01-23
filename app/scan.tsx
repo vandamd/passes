@@ -1,6 +1,5 @@
 import React, { useState, useCallback, useRef } from "react";
 import { View, StyleSheet, Button, Linking, Alert } from "react-native";
-import { Stack } from "expo-router";
 import { StyledText } from "@/components/StyledText";
 import {
     CameraType,
@@ -79,39 +78,33 @@ export default function ScanScreen() {
     if (!permission.granted) {
         const textColor = invertColors ? "black" : "white";
         return (
-            <>
-                <Stack.Screen />
-                <ContentContainer headerTitle="Scan QR Code">
-                    <View style={styles.permissionContainer}>
-                        <StyledText style={[styles.permissionText, { color: textColor }]}>
-                            We need your permission to show the camera
-                        </StyledText>
-                        <Button onPress={requestPermission} title="Grant Permission" />
-                    </View>
-                </ContentContainer>
-            </>
+            <ContentContainer headerTitle="Scan QR Code">
+                <View style={styles.permissionContainer}>
+                    <StyledText style={[styles.permissionText, { color: textColor }]}>
+                        We need your permission to show the camera
+                    </StyledText>
+                    <Button onPress={requestPermission} title="Grant Permission" />
+                </View>
+            </ContentContainer>
         );
     }
 
     return (
-        <>
-            <Stack.Screen />
-            <ContentContainer
-                headerTitle="Scan QR Code"
-                rightIcon="flip-camera-ios"
-                onRightIconPress={handleSwapCamera}
-                style={styles.contentContainer}
-            >
-                <CameraView
-                    style={styles.camera}
-                    facing={facing}
-                    onBarcodeScanned={isScanning ? handleBarcodeScanned : undefined}
-                    barcodeScannerSettings={{
-                        barcodeTypes: ["qr"],
-                    }}
-                />
-            </ContentContainer>
-        </>
+        <ContentContainer
+            headerTitle="Scan QR Code"
+            rightIcon="flip-camera-ios"
+            onRightIconPress={handleSwapCamera}
+            style={styles.contentContainer}
+        >
+            <CameraView
+                style={styles.camera}
+                facing={facing}
+                onBarcodeScanned={isScanning ? handleBarcodeScanned : undefined}
+                barcodeScannerSettings={{
+                    barcodeTypes: ["qr"],
+                }}
+            />
+        </ContentContainer>
     );
 }
 

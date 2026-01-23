@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useRef } from "react";
 import { View, StyleSheet, Button } from "react-native";
-import { Stack, useRouter, useLocalSearchParams } from "expo-router";
+import { useRouter, useLocalSearchParams } from "expo-router";
 import { StyledText } from "@/components/StyledText";
 import {
     CameraType,
@@ -11,6 +11,7 @@ import {
 import ContentContainer from "@/components/ContentContainer";
 import { useInvertColors } from "@/contexts/InvertColorsContext";
 import { n } from "@/utils/scaling";
+import { SUPPORTED_BARCODE_TYPES } from "@/types/pass";
 
 const SCAN_DEBOUNCE_MS = 500;
 
@@ -55,53 +56,33 @@ export default function CameraScreen() {
     if (!permission.granted) {
         const textColor = invertColors ? "black" : "white";
         return (
-            <>
-                <Stack.Screen />
-                <ContentContainer headerTitle="Add Pass">
-                    <View style={styles.permissionContainer}>
-                        <StyledText style={[styles.permissionText, { color: textColor }]}>
-                            We need your permission to show the camera
-                        </StyledText>
-                        <Button onPress={requestPermission} title="Grant Permission" />
-                    </View>
-                </ContentContainer>
-            </>
+            <ContentContainer headerTitle="Add Pass">
+                <View style={styles.permissionContainer}>
+                    <StyledText style={[styles.permissionText, { color: textColor }]}>
+                        We need your permission to show the camera
+                    </StyledText>
+                    <Button onPress={requestPermission} title="Grant Permission" />
+                </View>
+            </ContentContainer>
         );
     }
 
     return (
-        <>
-            <Stack.Screen />
-            <ContentContainer
-                headerTitle="Add Pass"
-                rightIcon="flip-camera-ios"
-                onRightIconPress={handleSwapCamera}
-                style={styles.contentContainer}
-            >
-                <CameraView
-                    style={styles.camera}
-                    facing={facing}
-                    onBarcodeScanned={handleBarcodeScanned}
-                    barcodeScannerSettings={{
-                        barcodeTypes: [
-                            "aztec",
-                            "ean13",
-                            "ean8",
-                            "qr",
-                            "pdf417",
-                            "upc_e",
-                            "datamatrix",
-                            "code39",
-                            "code93",
-                            "itf14",
-                            "codabar",
-                            "code128",
-                            "upc_a",
-                        ],
-                    }}
-                />
-            </ContentContainer>
-        </>
+        <ContentContainer
+            headerTitle="Add Pass"
+            rightIcon="flip-camera-ios"
+            onRightIconPress={handleSwapCamera}
+            style={styles.contentContainer}
+        >
+            <CameraView
+                style={styles.camera}
+                facing={facing}
+                onBarcodeScanned={handleBarcodeScanned}
+                barcodeScannerSettings={{
+                    barcodeTypes: [...SUPPORTED_BARCODE_TYPES],
+                }}
+            />
+        </ContentContainer>
     );
 }
 

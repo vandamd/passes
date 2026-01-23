@@ -1,12 +1,13 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { View, StyleSheet, Image, PixelRatio } from "react-native";
-import { Stack, useRouter, useLocalSearchParams } from "expo-router";
+import { useRouter, useLocalSearchParams } from "expo-router";
 import { StyledText } from "@/components/StyledText";
 import { usePasses } from "@/contexts/PassesContext";
 import { toDataURL, type DataURL } from "@bwip-js/react-native";
 import ContentContainer from "@/components/ContentContainer";
 import { useInvertColors } from "@/contexts/InvertColorsContext";
 import { n } from "@/utils/scaling";
+import { BarcodeType } from "@/types/pass";
 
 const BARCODE_TYPE_MAPPING: Readonly<Record<string, string>> = {
     aztec: "azteccode",
@@ -82,7 +83,8 @@ const ensureCodabarSentinels = (value: string) => {
     };
 };
 
-// Cache for barcode images
+// Cache for barcode images with LRU-style eviction
+const MAX_CACHE_SIZE = 50;
 const barcodeCache = new Map<string, DataURL>();
 
 export default function QRDisplayScreen() {
@@ -162,6 +164,12 @@ export default function QRDisplayScreen() {
             generateBarcode(bcidForBwipJs, bwipJsOptions)
                 .then((result) => {
                     if (!cancelled) {
+                        if (barcodeCache.size >= MAX_CACHE_SIZE) {
+                            const oldestKey = barcodeCache.keys().next().value;
+                            if (oldestKey) {
+                                barcodeCache.delete(oldestKey);
+                            }
+                        }
                         barcodeCache.set(cacheKey, result);
                         setBarcodeSource(result);
                     }
@@ -184,7 +192,7 @@ export default function QRDisplayScreen() {
     }, [currentData, currentType]);
 
     const handleSavePassAndGoHome = useCallback(() => {
-        const typeToSave = existingPass ? existingPass.type : scannedType;
+        const typeToSave = existingPass ? existingPass.type : (scannedType as BarcodeType);
         if (currentData && currentPassName && typeToSave && !existingPass && !hasAddedPassRef.current) {
             hasAddedPassRef.current = true;
             addPass(currentPassName, currentData, typeToSave);
@@ -198,16 +206,6 @@ export default function QRDisplayScreen() {
             router.replace("/");
         }
     }, [existingPass, deletePass, router]);
-
-    const handleRename = useCallback(() => {
-        router.push({
-            pathname: "/rename",
-            params: {
-                currentName: currentPassName,
-                passId: existingPass?.id,
-            },
-        });
-    }, [router, currentPassName, existingPass?.id]);
 
     const handleLayout = useCallback((event: { nativeEvent: { layout: { width: number; height: number } } }) => {
         const { width, height } = event.nativeEvent.layout;
@@ -224,37 +222,39 @@ export default function QRDisplayScreen() {
         [scaledSize.width, scaledSize.height]
     );
 
+    useEffect(() => {
+        if (!currentData) {
+            router.replace("/");
+        }
+    }, [currentData, router]);
+
     if (!currentData) {
-        router.replace("/");
         return null;
     }
 
     return (
-        <>
-            <Stack.Screen />
-            <ContentContainer
-                headerTitle={currentPassName}
-                rightIcon={existingPass ? "delete" : undefined}
-                showRightIcon={!!existingPass}
-                onRightIconPress={handleDeletePass}
-                onBackPress={handleSavePassAndGoHome}
-                style={styles.contentContainer}
-            >
-                <View style={[styles.barcodeContainer, containerBg]} onLayout={handleLayout}>
-                    <View style={styles.qrContainer}>
-                        {barcodeSource && scaledSize.width > 0 ? (
-                            <Image style={imageStyle} source={{ uri: barcodeSource.uri }} />
-                        ) : barcodeError ? (
-                            <StyledText style={styles.loadingText}>{barcodeError}</StyledText>
-                        ) : (
-                            <StyledText style={styles.loadingText}>
-                                {currentData ? `Generating ${currentType.toUpperCase()} Code...` : "No data for Barcode"}
-                            </StyledText>
-                        )}
-                    </View>
+        <ContentContainer
+            headerTitle={currentPassName}
+            rightIcon={existingPass ? "delete" : undefined}
+            showRightIcon={!!existingPass}
+            onRightIconPress={handleDeletePass}
+            onBackPress={handleSavePassAndGoHome}
+            style={styles.contentContainer}
+        >
+            <View style={[styles.barcodeContainer, containerBg]} onLayout={handleLayout}>
+                <View style={styles.qrContainer}>
+                    {barcodeSource && scaledSize.width > 0 ? (
+                        <Image style={imageStyle} source={{ uri: barcodeSource.uri }} />
+                    ) : barcodeError ? (
+                        <StyledText style={styles.loadingText}>{barcodeError}</StyledText>
+                    ) : (
+                        <StyledText style={styles.loadingText}>
+                            {currentData ? `Generating ${currentType.toUpperCase()} Code...` : "No data for Barcode"}
+                        </StyledText>
+                    )}
                 </View>
-            </ContentContainer>
-        </>
+            </View>
+        </ContentContainer>
     );
 }
 

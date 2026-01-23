@@ -1,16 +1,17 @@
 import React, { useState, useCallback, useMemo } from "react";
 import { View, TextInput, StyleSheet } from "react-native";
-import { Stack, useRouter, useFocusEffect, useLocalSearchParams } from "expo-router";
+import { useRouter, useFocusEffect, useLocalSearchParams } from "expo-router";
 import ContentContainer from "@/components/ContentContainer";
 import { useInvertColors } from "@/contexts/InvertColorsContext";
 import { MaterialIcons } from "@expo/vector-icons";
 import { HapticPressable } from "@/components/HapticPressable";
-import * as Haptics from "expo-haptics";
+import { useHaptic } from "@/contexts/HapticContext";
 import { usePasses } from "@/contexts/PassesContext";
 import { n } from "@/utils/scaling";
 
 export default function RenamePassScreen() {
     const { invertColors } = useInvertColors();
+    const { triggerHaptic } = useHaptic();
     const [passName, setPassName] = useState("");
     const router = useRouter();
     const { currentName, passId } = useLocalSearchParams<{
@@ -34,8 +35,8 @@ export default function RenamePassScreen() {
 
     const handleClear = useCallback(() => {
         setPassName("");
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    }, []);
+        triggerHaptic();
+    }, [triggerHaptic]);
 
     const dynamicStyles = useMemo(
         () => ({
@@ -50,37 +51,34 @@ export default function RenamePassScreen() {
     const iconColor = invertColors ? "black" : "white";
 
     return (
-        <>
-            <Stack.Screen />
-            <ContentContainer
-                headerTitle="Rename Pass"
-                rightIcon="check"
-                onRightIconPress={handleSave}
-                showRightIcon={passName.length > 0}
-                style={dynamicStyles.container}
-            >
-                <View style={[styles.inputContainer, dynamicStyles.inputContainerBorder]}>
-                    <TextInput
-                        style={[styles.input, dynamicStyles.inputText]}
-                        placeholderTextColor="#888"
-                        value={passName}
-                        placeholder="Pass Name"
-                        onChangeText={setPassName}
-                        autoFocus={true}
-                        cursorColor={cursorColor}
-                        selectionColor={cursorColor}
-                        onSubmitEditing={handleSave}
-                    />
-                    <HapticPressable
-                        style={[styles.clearButton, { opacity: passName.length > 0 ? 1 : 0 }]}
-                        onPress={handleClear}
-                        disabled={passName.length === 0}
-                    >
-                        <MaterialIcons name="clear" size={n(24)} color={iconColor} />
-                    </HapticPressable>
-                </View>
-            </ContentContainer>
-        </>
+        <ContentContainer
+            headerTitle="Rename Pass"
+            rightIcon="check"
+            onRightIconPress={handleSave}
+            showRightIcon={passName.length > 0}
+            style={dynamicStyles.container}
+        >
+            <View style={[styles.inputContainer, dynamicStyles.inputContainerBorder]}>
+                <TextInput
+                    style={[styles.input, dynamicStyles.inputText]}
+                    placeholderTextColor="#888"
+                    value={passName}
+                    placeholder="Pass Name"
+                    onChangeText={setPassName}
+                    autoFocus={true}
+                    cursorColor={cursorColor}
+                    selectionColor={cursorColor}
+                    onSubmitEditing={handleSave}
+                />
+                <HapticPressable
+                    style={[styles.clearButton, { opacity: passName.length > 0 ? 1 : 0 }]}
+                    onPress={handleClear}
+                    disabled={passName.length === 0}
+                >
+                    <MaterialIcons name="clear" size={n(24)} color={iconColor} />
+                </HapticPressable>
+            </View>
+        </ContentContainer>
     );
 }
 
