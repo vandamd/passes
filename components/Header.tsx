@@ -94,17 +94,19 @@ export function Header({
             ]}
         >
             {renderLeftButton()}
-            {onTitlePress ? (
-                <HapticPressable onPress={onTitlePress} style={styles.titleContainer}>
+            <View style={styles.titleContainer}>
+                {onTitlePress ? (
+                    <HapticPressable onPress={onTitlePress}>
+                        <StyledText style={styles.title} numberOfLines={1}>
+                            {headerTitle}
+                        </StyledText>
+                    </HapticPressable>
+                ) : (
                     <StyledText style={styles.title} numberOfLines={1}>
                         {headerTitle}
                     </StyledText>
-                </HapticPressable>
-            ) : (
-                <StyledText style={styles.title} numberOfLines={1}>
-                    {headerTitle}
-                </StyledText>
-            )}
+                )}
+            </View>
             {renderRightButton()}
         </View>
     );
