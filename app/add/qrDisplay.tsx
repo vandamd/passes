@@ -133,6 +133,19 @@ export default function QRDisplayScreen() {
         }
     }, [existingPass, router]);
 
+    const handleRename = useCallback(() => {
+        if (existingPass) {
+            router.push({
+                pathname: "/pass-name",
+                params: {
+                    mode: "rename",
+                    passId: existingPass.id,
+                    currentName: existingPass.name,
+                },
+            });
+        }
+    }, [existingPass, router]);
+
     useEffect(() => {
         if (params.confirmed === "true" && params.action === "deletePass" && existingPass) {
             router.setParams({ confirmed: undefined, action: undefined });
@@ -173,6 +186,7 @@ export default function QRDisplayScreen() {
             showRightIcon={!!existingPass}
             onRightIconPress={handleDeletePress}
             onBackPress={handleSavePassAndGoHome}
+            onTitlePress={existingPass ? handleRename : undefined}
             style={styles.contentContainer}
         >
             <View style={[styles.barcodeContainer, containerBg]} onLayout={handleLayout}>

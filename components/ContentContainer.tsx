@@ -15,6 +15,7 @@ interface ContentContainerProps {
     showRightIcon?: boolean;
     onRightIconPress?: () => void;
     onBackPress?: () => void;
+    onTitlePress?: () => void;
     style?: StyleProp<ViewStyle>;
 }
 
@@ -28,6 +29,7 @@ export default function ContentContainer({
     showRightIcon = true,
     onRightIconPress,
     onBackPress,
+    onTitlePress,
     style,
 }: ContentContainerProps) {
     const { invertColors } = useInvertColors();
@@ -48,6 +50,7 @@ export default function ContentContainer({
                     showRightIcon={showRightIcon}
                     onRightIconPress={onRightIconPress}
                     onBackPress={onBackPress}
+                    onTitlePress={onTitlePress}
                 />
             )}
             <View style={[styles.content, style]}>{children ?? null}</View>
