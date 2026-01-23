@@ -1,0 +1,27 @@
+{
+  "expo": {
+    "name": "appname",
+    "slug": "appname",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "scheme": "appname",
+    "newArchEnabled": true,
+    "icon": "./assets/images/icon.png",
+    "android": {
+      "backgroundColor": "#000000",
+      "package": "com.vandam.appname"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-font",
+      "./plugins/withAndroidConfigChanges",
+      "./plugins/withAndroidTheme"
+    ],
+    "experiments": {
+      "typedRoutes": true
+    },
+    "extra": {
+      "router": {}
+    }
+  }
+}
