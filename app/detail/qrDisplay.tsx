@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo, useRef } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { View, StyleSheet, Image } from "react-native";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { StyledText } from "@/components/StyledText";
@@ -11,8 +11,6 @@ import {
     getBwipJsBcid,
     generateBarcode,
     buildBarcodeOptions,
-    getCachedBarcode,
-    setCachedBarcode,
     isValidBarcodeType,
     getPersistedBarcode,
     persistBarcode,
@@ -75,20 +73,10 @@ export default function QRDisplayScreen() {
                 return;
             }
 
-            const cacheKey = `${currentType}:${currentRawData || currentData}:${currentRawData ? "raw" : "text"}`;
-
-            // L1: Check memory cache (sync)
-            const cached = getCachedBarcode(cacheKey);
-            if (cached) {
-                setBarcodeSource(cached);
-                return;
-            }
-
-            // L2: Check persistent cache for saved passes (async)
+            // Check persistent cache for saved passes
             if (passId) {
                 const persisted = await getPersistedBarcode(passId);
                 if (!cancelled && persisted) {
-                    setCachedBarcode(cacheKey, persisted as Parameters<typeof setCachedBarcode>[1]);
                     setBarcodeSource(persisted);
                     return;
                 }
@@ -96,19 +84,14 @@ export default function QRDisplayScreen() {
 
             if (cancelled) return;
 
-            // Generate barcode
             const bcid = getBwipJsBcid(currentType, currentData || "");
             const options = buildBarcodeOptions(bcid, currentData || "", currentRawData);
-
             setBarcodeError(null);
 
             try {
                 const result = await generateBarcode(bcid, options);
                 if (!cancelled) {
-                    setCachedBarcode(cacheKey, result);
                     setBarcodeSource(result);
-
-                    // Persist to L2 for saved passes
                     if (passId) {
                         persistBarcode(passId, result);
                     }
@@ -186,16 +169,6 @@ export default function QRDisplayScreen() {
         setViewSize({ width, height });
     }, []);
 
-    const containerBg = useMemo(
-        () => ({ backgroundColor: invertColors ? "white" : "black" }),
-        [invertColors]
-    );
-
-    const imageStyle = useMemo(
-        () => ({ width: scaledSize.width, height: scaledSize.height }),
-        [scaledSize.width, scaledSize.height]
-    );
-
     useEffect(() => {
         if (!currentData && !currentRawData) {
             router.replace("/");
@@ -216,10 +189,10 @@ export default function QRDisplayScreen() {
             onTitlePress={existingPass ? handleRename : undefined}
             style={styles.contentContainer}
         >
-            <View style={[styles.barcodeContainer, containerBg]} onLayout={handleLayout}>
+            <View style={[styles.barcodeContainer, { backgroundColor: invertColors ? "white" : "black" }]} onLayout={handleLayout}>
                 <View style={styles.qrContainer}>
                     {barcodeSource && scaledSize.width > 0 ? (
-                        <Image style={imageStyle} source={{ uri: barcodeSource.uri }} />
+                        <Image style={{ width: scaledSize.width, height: scaledSize.height }} source={{ uri: barcodeSource.uri }} />
                     ) : barcodeError ? (
                         <StyledText style={styles.loadingText}>{barcodeError}</StyledText>
                     ) : (

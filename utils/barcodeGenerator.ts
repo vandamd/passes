@@ -113,44 +113,20 @@ export const buildBarcodeOptions = (bcid: string, data: string, rawData?: string
     return options;
 };
 
-const MAX_CACHE_SIZE = 50;
-const barcodeCache = new Map<string, DataURL>();
-
-export const getCachedBarcode = (cacheKey: string): DataURL | undefined => {
-    return barcodeCache.get(cacheKey);
-};
-
-export const setCachedBarcode = (cacheKey: string, barcode: DataURL): void => {
-    if (barcodeCache.size >= MAX_CACHE_SIZE) {
-        const oldestKey = barcodeCache.keys().next().value;
-        if (oldestKey !== undefined) {
-            barcodeCache.delete(oldestKey);
-        }
-    }
-    barcodeCache.set(cacheKey, barcode);
-};
-
 export const isValidBarcodeType = (type: string | undefined): type is BarcodeType => {
     return type !== undefined && SUPPORTED_BARCODE_TYPES.includes(type as BarcodeType);
 };
 
-export const getPersistedBarcode = async (passId: string): Promise<CachedBarcode | null> => {
-    const persisted = await readFromCache(passId);
-    if (persisted) {
-        const cacheKey = `persisted_${passId}`;
-        setCachedBarcode(cacheKey, persisted as DataURL);
-    }
-    return persisted;
+export const getPersistedBarcode = (passId: string): Promise<CachedBarcode | null> => {
+    return readFromCache(passId);
 };
 
-export const persistBarcode = async (passId: string, barcode: CachedBarcode): Promise<void> => {
-    await writeToCache(passId, barcode);
+export const persistBarcode = (passId: string, barcode: CachedBarcode): Promise<void> => {
+    return writeToCache(passId, barcode);
 };
 
-export const deletePersistedBarcode = async (passId: string): Promise<void> => {
-    const cacheKey = `persisted_${passId}`;
-    barcodeCache.delete(cacheKey);
-    await deleteFromCache(passId);
+export const deletePersistedBarcode = (passId: string): Promise<void> => {
+    return deleteFromCache(passId);
 };
 
 export const preGenerateBarcode = async (

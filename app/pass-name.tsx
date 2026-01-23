@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo } from "react";
+import React, { useState, useCallback } from "react";
 import { View, TextInput, StyleSheet } from "react-native";
 import { useRouter, useFocusEffect, useLocalSearchParams } from "expo-router";
 import ContentContainer from "@/components/ContentContainer";
@@ -56,17 +56,7 @@ export default function PassNameScreen() {
         triggerHaptic();
     }, [triggerHaptic]);
 
-    const dynamicStyles = useMemo(
-        () => ({
-            container: { gap: n(32) },
-            inputContainerBorder: { borderBottomColor: invertColors ? "black" : "white" },
-            inputText: { color: invertColors ? "black" : "white" },
-        }),
-        [invertColors]
-    );
-
-    const cursorColor = invertColors ? "black" : "white";
-    const iconColor = invertColors ? "black" : "white";
+    const textColor = invertColors ? "black" : "white";
 
     return (
         <ContentContainer
@@ -74,18 +64,18 @@ export default function PassNameScreen() {
             rightIcon="check"
             onRightIconPress={handleSubmit}
             showRightIcon={passName.length > 0}
-            style={dynamicStyles.container}
+            style={{ gap: n(32) }}
         >
-            <View style={[styles.inputContainer, dynamicStyles.inputContainerBorder]}>
+            <View style={[styles.inputContainer, { borderBottomColor: textColor }]}>
                 <TextInput
-                    style={[styles.input, dynamicStyles.inputText]}
+                    style={[styles.input, { color: textColor }]}
                     placeholderTextColor="#888"
                     value={passName}
                     placeholder="Pass Name"
                     onChangeText={setPassName}
                     autoFocus={true}
-                    cursorColor={cursorColor}
-                    selectionColor={cursorColor}
+                    cursorColor={textColor}
+                    selectionColor={textColor}
                     onSubmitEditing={handleSubmit}
                 />
                 <HapticPressable
@@ -93,7 +83,7 @@ export default function PassNameScreen() {
                     onPress={handleClear}
                     disabled={passName.length === 0}
                 >
-                    <MaterialIcons name="clear" size={n(24)} color={iconColor} />
+                    <MaterialIcons name="clear" size={n(24)} color={textColor} />
                 </HapticPressable>
             </View>
         </ContentContainer>
