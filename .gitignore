@@ -18,6 +18,31 @@ expo-env.d.ts
 *.key
 *.mobileprovision
 
+# Android
+android/build/
+android/app/build/
+android/.gradle/
+android/local.properties
+android/gradle.properties.bak
+*.apk
+*.aab
+
+# iOS
+ios/build/
+ios/Pods/
+ios/*.xcworkspace
+ios/*.xcodeproj/project.xcworkspace/
+ios/*.xcodeproj/xcuserdata/
+ios/Podfile.lock
+
+# Module builds
+modules/*/android/build/
+modules/*/ios/build/
+
+# General build artifacts
+build/
+*.log
+
 # Metro
 .metro-health-check*
 
@@ -37,4 +62,5 @@ yarn-error.*
 *.tsbuildinfo
 
 app-example
-scripts/
+.cursor
+docs/

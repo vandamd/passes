@@ -1,59 +1,71 @@
 import React, { useEffect } from "react";
 import { Stack } from "expo-router";
 import { HapticProvider } from "../contexts/HapticContext";
+import { useFonts } from "expo-font";
+import { setStatusBarHidden } from "expo-status-bar";
 import {
     InvertColorsProvider,
     useInvertColors,
 } from "@/contexts/InvertColorsContext";
-import { useFonts } from "expo-font";
-import { setStatusBarHidden } from "expo-status-bar";
-import * as SystemUI from "expo-system-ui";
-import { SafeAreaProvider } from "react-native-safe-area-context";
 import { PassesProvider } from "@/contexts/PassesContext";
-import * as NavigationBar from 'expo-navigation-bar';
+import * as SystemUI from "expo-system-ui";
+import * as NavigationBar from "expo-navigation-bar";
+import * as SplashScreen from "expo-splash-screen";
 
 function RootNavigation() {
-    const [fontsLoaded] = useFonts({
-        "PublicSans-Regular": require("../assets/fonts/PublicSans-Regular.ttf"),
-    });
-
     const { invertColors } = useInvertColors();
 
     useEffect(() => {
-        setStatusBarHidden(true, "none");
+        SystemUI.setBackgroundColorAsync(invertColors ? "white" : "black");
         NavigationBar.setVisibilityAsync("hidden");
-    }, []);
-
-    useEffect(() => {
-        const newColor = invertColors ? "#FFFFFF" : "#000000";
-        SystemUI.setBackgroundColorAsync(newColor);
     }, [invertColors]);
-
-    if (!fontsLoaded) {
-        return null;
-    }
 
     return (
         <Stack
             screenOptions={{
                 headerShown: false,
                 animation: "none",
-                contentStyle: { backgroundColor: "#000000" },
+                contentStyle: {
+                    backgroundColor: invertColors ? "white" : "black",
+                },
             }}
-        ></Stack>
+        >
+            <Stack.Screen name="(tabs)" />
+            <Stack.Screen name="pass-name" />
+            <Stack.Screen name="add/camera" />
+            <Stack.Screen name="detail/qrDisplay" />
+            <Stack.Screen name="scan" />
+            <Stack.Screen name="confirm" />
+        </Stack>
     );
 }
 
 export default function RootLayout() {
+    const [fontsLoaded, fontError] = useFonts({
+        "PublicSans-Regular": require("../assets/fonts/PublicSans-Regular.ttf"),
+    });
+
+    useEffect(() => {
+        setStatusBarHidden(true, "none");
+    }, []);
+
+    useEffect(() => {
+        if (fontsLoaded || fontError) {
+            SplashScreen.hideAsync();
+        }
+    }, [fontsLoaded, fontError]);
+
+    if (!fontsLoaded && !fontError) {
+        return null;
+    }
+
     return (
-        <SafeAreaProvider>
+        <InvertColorsProvider>
             <HapticProvider>
-                <InvertColorsProvider>
-                    <PassesProvider>
-                        <RootNavigation />
-                    </PassesProvider>
-                </InvertColorsProvider>
+                <PassesProvider>
+                    <RootNavigation />
+                </PassesProvider>
             </HapticProvider>
-        </SafeAreaProvider>
+        </InvertColorsProvider>
     );
 }

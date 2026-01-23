@@ -3,12 +3,7 @@ import { Tabs } from "expo-router";
 import { Navbar, TabConfigItem } from "@/components/Navbar";
 
 export const TABS_CONFIG: ReadonlyArray<TabConfigItem> = [
-    {
-        name: "Passes",
-        screenName: "passes",
-        iconName: "qr-code",
-    },
-    { name: "Add", screenName: "add/name", iconName: "add-circle-outline" },
+    { name: "Passes", screenName: "passes", iconName: "qr-code" },
     { name: "Scan", screenName: "scan", iconName: "camera-alt", isExternalRoute: true },
     { name: "Settings", screenName: "settings", iconName: "settings" },
 ] as const;
@@ -32,6 +27,9 @@ export default function TabLayout() {
                     />
                 );
             }}
-        />
+        >
+            <Tabs.Screen name="passes" options={{ header: () => null }} />
+            <Tabs.Screen name="settings" options={{ header: () => null }} />
+        </Tabs>
     );
 }

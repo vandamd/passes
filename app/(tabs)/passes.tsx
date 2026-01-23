@@ -2,18 +2,19 @@ import { useCallback } from "react";
 import ContentContainer from "@/components/ContentContainer";
 import { router } from "expo-router";
 import CustomScrollView from "@/components/CustomScrollView";
+import { CenteredMessage } from "@/components/CenteredMessage";
 import { usePasses } from "@/contexts/PassesContext";
 import { StyledButton } from "@/components/StyledButton";
 import { View, StyleSheet } from "react-native";
-import { Pass } from "@/contexts/PassesContext";
-import { normalizedSize } from "@/utils/fontScaling";
+import { Pass } from "@/types/pass";
+import { n } from "@/utils/scaling";
 
 export default function PassesScreen() {
     const { passes } = usePasses();
 
     const handlePassPress = useCallback((pass: Pass) => {
         router.push({
-            pathname: "/add/qrDisplay",
+            pathname: "/detail/qrDisplay",
             params: {
                 passId: pass.id,
                 scannedData: pass.data,
@@ -22,31 +23,53 @@ export default function PassesScreen() {
         });
     }, []);
 
+    const renderItem = useCallback(
+        ({ item }: { item: Pass }) => (
+            <View style={styles.passItem}>
+                <StyledButton text={item.name} onPress={() => handlePassPress(item)} />
+            </View>
+        ),
+        [handlePassPress]
+    );
+
+    if (passes.length === 0) {
+        return (
+            <ContentContainer
+                headerTitle="Passes"
+                hideBackButton
+                rightIcon="add"
+                onRightIconPress={() => router.push("/add/camera")}
+                style={styles.container}
+            >
+                <CenteredMessage message="No passes" hint="Tap + to add a pass" />
+            </ContentContainer>
+        );
+    }
+
     return (
         <ContentContainer
             headerTitle="Passes"
-            hideBackButton={true}
+            hideBackButton
+            leftIcon="swap-vert"
+            onLeftIconPress={() => router.push("/reorder-passes")}
+            rightIcon="add"
+            onRightIconPress={() => router.push("/add/camera")}
             style={styles.container}
         >
-            <CustomScrollView>
-                {passes.map((pass) => (
-                    <View key={pass.id} style={styles.passItem}>
-                        <StyledButton
-                            text={pass.name}
-                            onPress={() => handlePassPress(pass)}
-                        />
-                    </View>
-                ))}
-            </CustomScrollView>
+            <CustomScrollView
+                data={passes}
+                renderItem={renderItem}
+                keyExtractor={(item) => item.id}
+            />
         </ContentContainer>
     );
 }
 
 const styles = StyleSheet.create({
     container: {
-        gap: normalizedSize(20),
+        gap: n(20),
     },
     passItem: {
-        marginBottom: normalizedSize(15),
+        marginBottom: n(15),
     },
 });

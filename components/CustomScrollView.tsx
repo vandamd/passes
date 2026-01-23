@@ -1,133 +1,158 @@
-import React, { useState, useRef, PropsWithChildren, useMemo, useCallback } from "react";
+import React, { useState, useRef, useEffect, forwardRef, useImperativeHandle } from "react";
 import {
-	ScrollView,
-	View,
-	Animated,
-	StyleSheet,
-	ScrollViewProps,
-	NativeSyntheticEvent,
-	NativeScrollEvent,
+    FlatList,
+    View,
+    Animated,
+    StyleSheet,
+    FlatListProps,
+    NativeSyntheticEvent,
+    NativeScrollEvent,
 } from "react-native";
 import { useInvertColors } from "@/contexts/InvertColorsContext";
-import { normalizedSize } from "@/utils/fontScaling";
+import { n } from "@/utils/scaling";
 
-interface CustomScrollViewProps extends ScrollViewProps {
-	// We can add any custom props here if needed in the future
+interface CustomScrollViewProps<T = any> extends FlatListProps<T> {
+    onScrollableChange?: (isScrollable: boolean) => void;
 }
 
-const CustomScrollView: React.FC<PropsWithChildren<CustomScrollViewProps>> = React.memo(({
-	children,
-	style,
-	contentContainerStyle,
-	...rest
-}) => {
-	const { invertColors } = useInvertColors();
-	const [contentHeight, setContentHeight] = useState<number>(0);
-	const [scrollViewHeight, setScrollViewHeight] = useState<number>(0);
-	const scrollY = useRef(new Animated.Value(0)).current;
+export interface CustomScrollViewRef {
+    scrollToTop: () => void;
+}
 
-	const scrollIndicatorHeight = useMemo(() => {
-		if (scrollViewHeight > 0 && contentHeight > 0 && contentHeight > scrollViewHeight) {
-			return Math.max((scrollViewHeight * scrollViewHeight) / contentHeight, 20);
-		}
-		return 0;
-	}, [scrollViewHeight, contentHeight]);
+function CustomScrollViewInner<T>({
+    style,
+    contentContainerStyle,
+    onScrollableChange,
+    innerRef,
+    ...rest
+}: CustomScrollViewProps<T> & { innerRef?: React.Ref<CustomScrollViewRef> }) {
+    const flatListRef = useRef<FlatList>(null);
 
-	const scrollIndicatorPosition = useMemo(() => {
-		if (contentHeight > scrollViewHeight && scrollIndicatorHeight > 0) {
-			return scrollY.interpolate({
-				inputRange: [0, contentHeight - scrollViewHeight],
-				outputRange: [0, scrollViewHeight - scrollIndicatorHeight],
-				extrapolate: "clamp",
-			});
-		}
-		return 0;
-	}, [contentHeight, scrollViewHeight, scrollIndicatorHeight, scrollY]);
+    useImperativeHandle(innerRef, () => ({
+        scrollToTop: () => {
+            flatListRef.current?.scrollToOffset({ offset: 0, animated: false });
+        },
+    }));
 
-	const handleScroll = useMemo(() => Animated.event(
-		[{ nativeEvent: { contentOffset: { y: scrollY } } }],
-		{
-			useNativeDriver: false,
-			listener: (event: NativeSyntheticEvent<NativeScrollEvent>) => {
-				if (rest.onScroll) {
-					rest.onScroll(event);
-				}
-			},
-		}
-	), [scrollY, rest.onScroll]);
+    const { invertColors } = useInvertColors();
+    const [contentHeight, setContentHeight] = useState<number>(0);
+    const [scrollViewHeight, setScrollViewHeight] = useState<number>(0);
+    const scrollY = useRef(new Animated.Value(0)).current;
 
-	const handleContentSizeChange = useCallback((width: number, height: number) => {
-		setContentHeight(height);
-		if (rest.onContentSizeChange) {
-			rest.onContentSizeChange(width, height);
-		}
-	}, [rest.onContentSizeChange]);
+    const isScrollable = scrollViewHeight > 0 && contentHeight > 0 && contentHeight > scrollViewHeight;
 
-	const handleLayout = useCallback((event: any) => {
-		const { height } = event.nativeEvent.layout;
-		setScrollViewHeight(height);
-		if (rest.onLayout) {
-			rest.onLayout(event);
-		}
-	}, [rest.onLayout]);
+    const scrollIndicatorHeight = isScrollable
+        ? Math.max((scrollViewHeight * scrollViewHeight) / contentHeight, n(20))
+        : 0;
 
-	const scrollViewStyle = useMemo(() => [{ width: "100%" }, style], [style]);
-	const scrollContentStyle = useMemo(() => [{ flexGrow: 1 }, contentContainerStyle], [contentContainerStyle]);
+    const prevIsScrollable = useRef<boolean | null>(null);
+    useEffect(() => {
+        if (onScrollableChange && prevIsScrollable.current !== isScrollable) {
+            prevIsScrollable.current = isScrollable;
+            onScrollableChange(isScrollable);
+        }
+    }, [isScrollable, onScrollableChange]);
 
-	const trackBgColor = useMemo(() => ({
-		backgroundColor: invertColors ? "black" : "white"
-	}), [invertColors]);
+    const scrollIndicatorPosition =
+        contentHeight > scrollViewHeight && scrollIndicatorHeight > 0
+            ? scrollY.interpolate({
+                inputRange: [0, contentHeight - scrollViewHeight],
+                outputRange: [0, scrollViewHeight - scrollIndicatorHeight],
+                extrapolate: "clamp",
+            })
+            : 0;
 
-	const thumbStyle = useMemo(() => ({
-		backgroundColor: invertColors ? "black" : "white",
-		height: scrollIndicatorHeight,
-		transform: [{ translateY: scrollIndicatorPosition as any }],
-	}), [invertColors, scrollIndicatorHeight, scrollIndicatorPosition]);
+    const handleScroll = Animated.event(
+        [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+        {
+            useNativeDriver: false,
+            listener: (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+                if (rest.onScroll) {
+                    rest.onScroll(event);
+                }
+            },
+        }
+    );
 
-	return (
-		<View style={styles.container}>
-			<ScrollView
-				style={scrollViewStyle}
-				contentContainerStyle={scrollContentStyle}
-				showsVerticalScrollIndicator={false}
-				overScrollMode="never"
-				onContentSizeChange={handleContentSizeChange}
-				onLayout={handleLayout}
-				onScroll={handleScroll}
-				scrollEventThrottle={16}
-				{...rest}
-			>
-				{children}
-			</ScrollView>
-			{scrollIndicatorHeight > 0 && (
-				<View style={[styles.scrollIndicatorTrack, styles.trackTransform, trackBgColor]}>
-					<Animated.View style={[styles.scrollIndicatorThumb, thumbStyle]} />
-				</View>
-			)}
-		</View>
-	);
-});
+    return (
+        <View style={styles.container}>
+            <FlatList
+                ref={flatListRef}
+                style={[{ width: "100%" }, style]}
+                contentContainerStyle={[{ flexGrow: 1 }, contentContainerStyle]}
+                showsVerticalScrollIndicator={false}
+                overScrollMode="never"
+                onContentSizeChange={(width, height) => {
+                    setContentHeight(height);
+                    if (rest.onContentSizeChange) {
+                        rest.onContentSizeChange(width, height);
+                    }
+                }}
+                onLayout={(event) => {
+                    const { height } = event.nativeEvent.layout;
+                    setScrollViewHeight(height);
+                    if (rest.onLayout) {
+                        rest.onLayout(event);
+                    }
+                }}
+                onScroll={handleScroll}
+                scrollEventThrottle={16}
+                {...rest}
+            />
+            {scrollIndicatorHeight > 0 && (
+                <View
+                    style={[
+                        styles.scrollIndicatorTrack,
+                        { transform: [{ translateX: n(1) }] },
+                        { backgroundColor: invertColors ? "black" : "white" },
+                    ]}
+                >
+                    <Animated.View
+                        style={[
+                            styles.scrollIndicatorThumb,
+                            {
+                                backgroundColor: invertColors
+                                    ? "black"
+                                    : "white",
+                            },
+                            {
+                                height: scrollIndicatorHeight,
+                                transform: [
+                                    {
+                                        translateY:
+                                            scrollIndicatorPosition as any,
+                                    },
+                                ],
+                            },
+                        ]}
+                    />
+                </View>
+            )}
+        </View>
+    );
+}
+
+const CustomScrollView = forwardRef<CustomScrollViewRef, CustomScrollViewProps>(
+    (props, ref) => <CustomScrollViewInner {...props} innerRef={ref} />
+) as <T>(props: CustomScrollViewProps<T> & { ref?: React.Ref<CustomScrollViewRef> }) => React.ReactElement;
 
 const styles = StyleSheet.create({
-	container: {
-		flex: 1,
-		flexDirection: "row",
-		width: "100%",
-	},
-	scrollIndicatorTrack: {
-		width: normalizedSize(1),
-		height: "100%",
-		position: "absolute",
-		right: normalizedSize(-18),
-	},
-	trackTransform: {
-		transform: [{ translateX: normalizedSize(1) }],
-	},
-	scrollIndicatorThumb: {
-		width: normalizedSize(5),
-		position: "absolute",
-		right: normalizedSize(-2),
-	},
+    container: {
+        flex: 1,
+        flexDirection: "row",
+        width: "100%",
+    },
+    scrollIndicatorTrack: {
+        width: n(1),
+        height: "100%",
+        position: "absolute",
+        right: n(-2),
+    },
+    scrollIndicatorThumb: {
+        width: n(5),
+        position: "absolute",
+        right: n(-2),
+    },
 });
 
 export default CustomScrollView;
