@@ -48,30 +48,23 @@ export const PassesProvider: React.FC<{ children: ReactNode }> = ({ children }) 
 
         const loadPasses = async () => {
             try {
-                // Check if we've already migrated from SecureStore
                 const migrated = await AsyncStorage.getItem(SECURE_STORE_MIGRATED_KEY);
 
                 if (!migrated) {
-                    // Try to migrate data from SecureStore (for existing users)
                     const secureStoreData = await SecureStore.getItemAsync(PASSES_STORAGE_KEY);
                     if (secureStoreData) {
-                        // Move data to AsyncStorage
                         await AsyncStorage.setItem(PASSES_STORAGE_KEY, secureStoreData);
-                        // Clean up SecureStore
                         await SecureStore.deleteItemAsync(PASSES_STORAGE_KEY);
                     }
-                    // Mark migration as complete
                     await AsyncStorage.setItem(SECURE_STORE_MIGRATED_KEY, "true");
                 }
 
-                // Load from AsyncStorage
                 const stored = await AsyncStorage.getItem(PASSES_STORAGE_KEY);
                 if (cancelled) return;
                 if (stored) {
                     setPasses(parseStoredPasses(stored));
                 }
             } catch {
-                // Ignore errors
             } finally {
                 if (!cancelled) setIsHydrated(true);
             }
