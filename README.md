@@ -1,30 +1,35 @@
-<img src="assets/images/example.png" alt="Example Template Screenshots">
+<img src="assets/images/example.png" alt="Passes Screenshots">
 
-<p>A minimal Expo template to create a LightOS-inspired app.</p>
+<p>An app for the Light Phone III to store and scan various codes.</p>
 
-> [!NOTE]
-> This is very much a WIP. There's a lot of things I want to add but it'll take me a bit of time :)
+![GitHub License](https://img.shields.io/github/license/vandamd/passes)
+![GitHub Release](https://img.shields.io/github/v/release/vandamd/passes)
 
-## Quick Start
+## Installation
+The lastest .apk file is available in [releases](https://github.com/vandamd/passes/releases/latest).
 
-1. Update `app.json` with your app name, slug, and package name
-3. Run `bunx expo run:android`
+I recommend using [Obtainium](https://github.com/ImranR98/Obtainium) and adding the repository's URL to receive updates.
 
-## Commands
+## Features
+- Reading and saving codes
+- Scanning QR codes to open in default browser
 
-```bash
-bunx expo run:android  # Build and run (dev)
-eas build -p android --profile production --local  # Build APK locally
-bun run sync-version   # Sync version across files
-bun run generate-icon  # Generate icon from app name
-```
+Supported codes:
+- QR Code
+- Aztec Code
+- EAN-13
+- EAN-8
+- PDF417
+- UPC-E
+- Data Matrix
+- Code 39
+- Code 93
+- ITF-14
+- Codabar
+- Code 128
+- UPC-A
 
-## GitHub Releases
+## Support
+Passes is developed and maintained in my free time.
 
-Trigger the workflow manually in Actions tab. It builds an APK and creates a GitHub release tagged with the version from `app.json`. Changelog is auto-generated from commits since the last release.
-
-Requires `EXPO_TOKEN` secret in repo settings.
-
-## Detailed Docs
-
-See [CLAUDE.md](./CLAUDE.md) for complete component reference, patterns, and examples.
+If you find it useful, please [consider sponsoring](https://github.com/sponsors/vandamd)! :)
