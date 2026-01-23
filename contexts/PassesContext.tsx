@@ -31,7 +31,7 @@ interface PassesContextType {
     getPassById: (id: string) => Pass | undefined;
 }
 
-const PASSES_STORAGE_KEY = "passes";
+const PASSES_STORAGE_KEY = "userPasses_v1";
 
 const PassesContext = createContext<PassesContextType | undefined>(undefined);
 
