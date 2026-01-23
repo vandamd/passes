@@ -4,7 +4,7 @@
 	"version": "2.3.0",
 	"scripts": {
 		"android": "expo run:android",
-		"sync-version": "node scripts/sync-version.js",
+		"sync-android-version": "node scripts/sync-version.js",
 		"generate-icon": "node scripts/generate-icon.js",
 		"ios": "expo run:ios"
 	},
@@ -35,6 +35,7 @@
 		"canvas": "^3.2.1",
 		"eslint": "^9.39.2",
 		"eslint-config-expo": "~10.0.0",
+		"react-native-svg-transformer": "^1.5.2",
 		"typescript": "~5.9.2"
 	},
 	"private": true
