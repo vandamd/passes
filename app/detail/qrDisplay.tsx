@@ -42,8 +42,8 @@ export default function QRDisplayScreen() {
 
     useEffect(() => {
         if (barcodeSource && viewSize.width > 0 && viewSize.height > 0) {
-            const availableWidth = viewSize.width * 0.8;
-            const availableHeight = viewSize.height * 0.6;
+            const availableWidth = viewSize.width * 0.7;
+            const availableHeight = viewSize.height * 0.7;
 
             const imageWidth = barcodeSource.width;
             const imageHeight = barcodeSource.height;
