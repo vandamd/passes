@@ -29,6 +29,7 @@ interface PassesContextType {
     deletePass: (id: string) => void;
     updatePassName: (id: string, newName: string) => void;
     getPassById: (id: string) => Pass | undefined;
+    reorderPass: (id: string, direction: "up" | "down") => void;
 }
 
 const PASSES_STORAGE_KEY = "userPasses_v1";
@@ -39,7 +40,6 @@ export const PassesProvider: React.FC<{ children: ReactNode }> = ({ children }) 
     const [passes, setPasses] = useState<Pass[]>([]);
     const [isHydrated, setIsHydrated] = useState(false);
 
-    // Load passes from SecureStore on mount
     useEffect(() => {
         let cancelled = false;
 
@@ -60,7 +60,6 @@ export const PassesProvider: React.FC<{ children: ReactNode }> = ({ children }) 
         };
     }, []);
 
-    // Save passes to SecureStore when they change (after hydration)
     useEffect(() => {
         if (!isHydrated) return;
 
@@ -98,9 +97,23 @@ export const PassesProvider: React.FC<{ children: ReactNode }> = ({ children }) 
         [passes]
     );
 
+    const reorderPass = useCallback((id: string, direction: "up" | "down") => {
+        setPasses((prev) => {
+            const index = prev.findIndex((pass) => pass.id === id);
+            if (index === -1) return prev;
+
+            const newIndex = direction === "up" ? index - 1 : index + 1;
+            if (newIndex < 0 || newIndex >= prev.length) return prev;
+
+            const newPasses = [...prev];
+            [newPasses[index], newPasses[newIndex]] = [newPasses[newIndex], newPasses[index]];
+            return newPasses;
+        });
+    }, []);
+
     const contextValue = useMemo(
-        () => ({ passes, addPass, deletePass, updatePassName, getPassById }),
-        [passes, addPass, deletePass, updatePassName, getPassById]
+        () => ({ passes, addPass, deletePass, updatePassName, getPassById, reorderPass }),
+        [passes, addPass, deletePass, updatePassName, getPassById, reorderPass]
     );
 
     return (

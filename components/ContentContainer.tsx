@@ -9,6 +9,8 @@ interface ContentContainerProps {
     headerTitle?: string;
     children?: ReactNode;
     hideBackButton?: boolean;
+    leftIcon?: keyof typeof MaterialIcons.glyphMap;
+    onLeftIconPress?: () => void;
     rightIcon?: keyof typeof MaterialIcons.glyphMap;
     showRightIcon?: boolean;
     onRightIconPress?: () => void;
@@ -20,6 +22,8 @@ export default function ContentContainer({
     headerTitle,
     children,
     hideBackButton = false,
+    leftIcon,
+    onLeftIconPress,
     rightIcon,
     showRightIcon = true,
     onRightIconPress,
@@ -38,6 +42,8 @@ export default function ContentContainer({
                 <Header
                     headerTitle={headerTitle}
                     hideBackButton={hideBackButton}
+                    leftIcon={leftIcon}
+                    onLeftIconPress={onLeftIconPress}
                     rightIcon={rightIcon}
                     showRightIcon={showRightIcon}
                     onRightIconPress={onRightIconPress}

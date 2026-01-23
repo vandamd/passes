@@ -16,12 +16,14 @@ export default function ConfirmScreen() {
         confirmText: string;
         action: string;
         returnPath: string;
+        returnParams?: string;
     }>();
 
     const handleConfirm = () => {
-        router.navigate({
+        const extraParams = params.returnParams ? JSON.parse(params.returnParams) : {};
+        router.dismissTo({
             pathname: (params.returnPath || "/(tabs)/settings") as any,
-            params: { confirmed: "true", action: params.action },
+            params: { ...extraParams, confirmed: "true", action: params.action },
         });
     };
 

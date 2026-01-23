@@ -1,28 +1,44 @@
 import React, { useState, useCallback, useMemo } from "react";
 import { View, TextInput, StyleSheet } from "react-native";
-import { useRouter, useFocusEffect } from "expo-router";
+import { useRouter, useFocusEffect, useLocalSearchParams } from "expo-router";
 import ContentContainer from "@/components/ContentContainer";
 import { useInvertColors } from "@/contexts/InvertColorsContext";
 import { MaterialIcons } from "@expo/vector-icons";
 import { HapticPressable } from "@/components/HapticPressable";
 import { useHaptic } from "@/contexts/HapticContext";
+import { usePasses } from "@/contexts/PassesContext";
 import { n } from "@/utils/scaling";
 
-export default function NamePassScreen() {
+export default function PassNameScreen() {
     const { invertColors } = useInvertColors();
     const { triggerHaptic } = useHaptic();
+    const { updatePassName } = usePasses();
     const [passName, setPassName] = useState("");
     const router = useRouter();
 
+    const { mode, passId, currentName } = useLocalSearchParams<{
+        mode?: "create" | "rename";
+        passId?: string;
+        currentName?: string;
+    }>();
+
+    const isRenameMode = mode === "rename";
+    const headerTitle = isRenameMode ? "Rename Pass" : "Name Pass";
+
     useFocusEffect(
         useCallback(() => {
-            setPassName("");
-        }, [])
+            setPassName(isRenameMode ? (currentName || "") : "");
+        }, [isRenameMode, currentName])
     );
 
-    const handleNext = useCallback(() => {
-        router.push({ pathname: "/add/camera", params: { passName } });
-    }, [router, passName]);
+    const handleSubmit = useCallback(() => {
+        if (isRenameMode && passId && passName.trim()) {
+            updatePassName(passId, passName.trim());
+            router.back();
+        } else if (!isRenameMode) {
+            router.push({ pathname: "/add/camera", params: { passName } });
+        }
+    }, [isRenameMode, passId, passName, updatePassName, router]);
 
     const handleClear = useCallback(() => {
         setPassName("");
@@ -43,9 +59,9 @@ export default function NamePassScreen() {
 
     return (
         <ContentContainer
-            headerTitle="Name Pass"
+            headerTitle={headerTitle}
             rightIcon="check"
-            onRightIconPress={handleNext}
+            onRightIconPress={handleSubmit}
             showRightIcon={passName.length > 0}
             style={dynamicStyles.container}
         >
@@ -59,7 +75,7 @@ export default function NamePassScreen() {
                     autoFocus={true}
                     cursorColor={cursorColor}
                     selectionColor={cursorColor}
-                    onSubmitEditing={handleNext}
+                    onSubmitEditing={handleSubmit}
                 />
                 <HapticPressable
                     style={[styles.clearButton, { opacity: passName.length > 0 ? 1 : 0 }]}

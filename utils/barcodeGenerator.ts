@@ -1,0 +1,118 @@
+import { toDataURL, type DataURL } from "@bwip-js/react-native";
+import { PixelRatio } from "react-native";
+import { BarcodeType, SUPPORTED_BARCODE_TYPES } from "@/types/pass";
+
+const BARCODE_TYPE_MAPPING: Readonly<Record<string, string>> = {
+    aztec: "azteccode",
+    ean13: "ean13",
+    ean8: "ean8",
+    qr: "qrcode",
+    pdf417: "pdf417",
+    upc_e: "upce",
+    datamatrix: "datamatrix",
+    code39: "code39",
+    code93: "code93",
+    itf14: "itf14",
+    codabar: "rationalizedCodabar",
+    code128: "code128",
+    upc_a: "upca",
+};
+
+const getAztecBcid = (data: string): string => {
+    const asNumber = parseInt(data, 10);
+    if (!isNaN(asNumber) && asNumber >= 0 && asNumber <= 255 && String(asNumber) === data) {
+        return "aztecrune";
+    }
+    if (data.length <= 89) {
+        return "azteccodecompact";
+    }
+    return "azteccode";
+};
+
+export const getBwipJsBcid = (expoType: string, data: string): string => {
+    if (expoType.toLowerCase() === "aztec") {
+        return getAztecBcid(data);
+    }
+    return BARCODE_TYPE_MAPPING[expoType.toLowerCase()] || expoType;
+};
+
+type BwipRenderOptions = Parameters<typeof toDataURL>[0] & {
+    includestartstop?: boolean;
+};
+
+export const generateBarcode = async (
+    bcid: string,
+    options: Omit<BwipRenderOptions, "bcid">
+): Promise<DataURL> => {
+    try {
+        return await toDataURL({ ...options, bcid });
+    } catch (err) {
+        if (bcid === "azteccodecompact") {
+            return await toDataURL({ ...options, bcid: "azteccode" });
+        }
+        throw err;
+    }
+};
+
+const CODABAR_SENTINELS = new Set(["A", "B", "C", "D"]);
+
+export const ensureCodabarSentinels = (value: string) => {
+    const uppercaseValue = value.toUpperCase();
+    const startsWithSentinel = uppercaseValue.length > 0 && CODABAR_SENTINELS.has(uppercaseValue[0]);
+    const endsWithSentinel = uppercaseValue.length > 0 && CODABAR_SENTINELS.has(uppercaseValue[uppercaseValue.length - 1]);
+
+    let sanitizedText = uppercaseValue;
+    if (!startsWithSentinel) {
+        sanitizedText = `A${sanitizedText}`;
+    }
+    if (!endsWithSentinel) {
+        sanitizedText = `${sanitizedText}A`;
+    }
+
+    return {
+        sanitizedText,
+        altText: uppercaseValue,
+        includeStartStop: startsWithSentinel && endsWithSentinel,
+    };
+};
+
+export const buildBarcodeOptions = (bcid: string, data: string): Omit<BwipRenderOptions, "bcid"> => {
+    const options: Omit<BwipRenderOptions, "bcid"> = {
+        text: data,
+        scale: PixelRatio.get() * 2,
+        includetext: true,
+        textxalign: "center",
+        barcolor: "000000",
+        backgroundcolor: "FFFFFF",
+    };
+
+    if (bcid === "rationalizedCodabar") {
+        const { sanitizedText, altText, includeStartStop } = ensureCodabarSentinels(data);
+        options.text = sanitizedText;
+        options.alttext = altText || sanitizedText;
+        options.includestartstop = includeStartStop;
+    }
+
+    return options;
+};
+
+const MAX_CACHE_SIZE = 50;
+const barcodeCache = new Map<string, DataURL>();
+
+export const getCachedBarcode = (cacheKey: string): DataURL | undefined => {
+    return barcodeCache.get(cacheKey);
+};
+
+export const setCachedBarcode = (cacheKey: string, barcode: DataURL): void => {
+    if (barcodeCache.size >= MAX_CACHE_SIZE) {
+        const oldestKey = barcodeCache.keys().next().value;
+        if (oldestKey !== undefined) {
+            barcodeCache.delete(oldestKey);
+        }
+    }
+    barcodeCache.set(cacheKey, barcode);
+};
+
+export const isValidBarcodeType = (type: string | undefined): type is BarcodeType => {
+    return type !== undefined && SUPPORTED_BARCODE_TYPES.includes(type as BarcodeType);
+};

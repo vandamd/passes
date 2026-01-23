@@ -1,103 +1,35 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef } from "react";
-import { View, StyleSheet, Image, PixelRatio } from "react-native";
+import { View, StyleSheet, Image } from "react-native";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { StyledText } from "@/components/StyledText";
 import { usePasses } from "@/contexts/PassesContext";
-import { toDataURL, type DataURL } from "@bwip-js/react-native";
 import ContentContainer from "@/components/ContentContainer";
 import { useInvertColors } from "@/contexts/InvertColorsContext";
 import { n } from "@/utils/scaling";
 import { BarcodeType } from "@/types/pass";
-
-const BARCODE_TYPE_MAPPING: Readonly<Record<string, string>> = {
-    aztec: "azteccode",
-    ean13: "ean13",
-    ean8: "ean8",
-    qr: "qrcode",
-    pdf417: "pdf417",
-    upc_e: "upce",
-    datamatrix: "datamatrix",
-    code39: "code39",
-    code93: "code93",
-    itf14: "itf14",
-    codabar: "rationalizedCodabar",
-    code128: "code128",
-    upc_a: "upca",
-};
-
-const getAztecBcid = (data: string): string => {
-    const asNumber = parseInt(data, 10);
-    if (!isNaN(asNumber) && asNumber >= 0 && asNumber <= 255 && String(asNumber) === data) {
-        return "aztecrune";
-    }
-    if (data.length <= 89) {
-        return "azteccodecompact";
-    }
-    return "azteccode";
-};
-
-const getBwipJsBcid = (expoType: string, data: string): string => {
-    if (expoType.toLowerCase() === "aztec") {
-        return getAztecBcid(data);
-    }
-    return BARCODE_TYPE_MAPPING[expoType.toLowerCase()] || expoType;
-};
-
-type BwipRenderOptions = Parameters<typeof toDataURL>[0] & {
-    includestartstop?: boolean;
-};
-
-const generateBarcode = async (
-    bcid: string,
-    options: Omit<BwipRenderOptions, "bcid">
-): Promise<DataURL> => {
-    try {
-        return await toDataURL({ ...options, bcid });
-    } catch (err) {
-        if (bcid === "azteccodecompact") {
-            return await toDataURL({ ...options, bcid: "azteccode" });
-        }
-        throw err;
-    }
-};
-
-const CODABAR_SENTINELS = new Set(["A", "B", "C", "D"]);
-
-const ensureCodabarSentinels = (value: string) => {
-    const uppercaseValue = value.toUpperCase();
-    const startsWithSentinel = uppercaseValue.length > 0 && CODABAR_SENTINELS.has(uppercaseValue[0]);
-    const endsWithSentinel = uppercaseValue.length > 0 && CODABAR_SENTINELS.has(uppercaseValue[uppercaseValue.length - 1]);
-
-    let sanitizedText = uppercaseValue;
-    if (!startsWithSentinel) {
-        sanitizedText = `A${sanitizedText}`;
-    }
-    if (!endsWithSentinel) {
-        sanitizedText = `${sanitizedText}A`;
-    }
-
-    return {
-        sanitizedText,
-        altText: uppercaseValue,
-        includeStartStop: startsWithSentinel && endsWithSentinel,
-    };
-};
-
-// Cache for barcode images with LRU-style eviction
-const MAX_CACHE_SIZE = 50;
-const barcodeCache = new Map<string, DataURL>();
+import {
+    getBwipJsBcid,
+    generateBarcode,
+    buildBarcodeOptions,
+    getCachedBarcode,
+    setCachedBarcode,
+    isValidBarcodeType,
+} from "@/utils/barcodeGenerator";
 
 export default function QRDisplayScreen() {
     const { invertColors } = useInvertColors();
     const router = useRouter();
-    const { scannedData, scannedType, passName, passId } = useLocalSearchParams<{
+    const params = useLocalSearchParams<{
         scannedData: string;
         scannedType?: string;
         passName?: string;
         passId?: string;
+        confirmed?: string;
+        action?: string;
     }>();
+    const { scannedData, scannedType, passName, passId } = params;
     const { addPass, getPassById, deletePass } = usePasses();
-    const [barcodeSource, setBarcodeSource] = useState<DataURL | null>(null);
+    const [barcodeSource, setBarcodeSource] = useState<{ uri: string; width: number; height: number } | null>(null);
     const [barcodeError, setBarcodeError] = useState<string | null>(null);
     const [scaledSize, setScaledSize] = useState({ width: 0, height: 0 });
     const [viewSize, setViewSize] = useState({ width: 0, height: 0 });
@@ -134,43 +66,22 @@ export default function QRDisplayScreen() {
 
         if (currentData && currentType) {
             const cacheKey = `${currentType}:${currentData}`;
-            const cached = barcodeCache.get(cacheKey);
+            const cached = getCachedBarcode(cacheKey);
 
             if (cached) {
                 setBarcodeSource(cached);
                 return;
             }
 
-            const bcidForBwipJs = getBwipJsBcid(currentType, currentData);
-
-            const bwipJsOptions: Omit<BwipRenderOptions, "bcid"> = {
-                text: currentData,
-                scale: PixelRatio.get() * 2,
-                includetext: true,
-                textxalign: "center",
-                barcolor: "000000",
-                backgroundcolor: "FFFFFF",
-            };
-
-            if (bcidForBwipJs === "rationalizedCodabar") {
-                const { sanitizedText, altText, includeStartStop } = ensureCodabarSentinels(currentData);
-                bwipJsOptions.text = sanitizedText;
-                bwipJsOptions.alttext = altText || sanitizedText;
-                bwipJsOptions.includestartstop = includeStartStop;
-            }
+            const bcid = getBwipJsBcid(currentType, currentData);
+            const options = buildBarcodeOptions(bcid, currentData);
 
             setBarcodeError(null);
 
-            generateBarcode(bcidForBwipJs, bwipJsOptions)
+            generateBarcode(bcid, options)
                 .then((result) => {
                     if (!cancelled) {
-                        if (barcodeCache.size >= MAX_CACHE_SIZE) {
-                            const oldestKey = barcodeCache.keys().next().value;
-                            if (oldestKey) {
-                                barcodeCache.delete(oldestKey);
-                            }
-                        }
-                        barcodeCache.set(cacheKey, result);
+                        setCachedBarcode(cacheKey, result);
                         setBarcodeSource(result);
                     }
                 })
@@ -192,20 +103,43 @@ export default function QRDisplayScreen() {
     }, [currentData, currentType]);
 
     const handleSavePassAndGoHome = useCallback(() => {
-        const typeToSave = existingPass ? existingPass.type : (scannedType as BarcodeType);
-        if (currentData && currentPassName && typeToSave && !existingPass && !hasAddedPassRef.current) {
-            hasAddedPassRef.current = true;
-            addPass(currentPassName, currentData, typeToSave);
+        if (currentData && currentPassName && !existingPass && !hasAddedPassRef.current) {
+            const validatedType: BarcodeType | undefined = isValidBarcodeType(scannedType) ? scannedType : undefined;
+            if (validatedType) {
+                hasAddedPassRef.current = true;
+                addPass(currentPassName, currentData, validatedType);
+            }
         }
         router.replace("/");
     }, [existingPass, scannedType, currentData, currentPassName, addPass, router]);
 
-    const handleDeletePass = useCallback(() => {
+    const handleDeletePress = useCallback(() => {
         if (existingPass) {
+            router.push({
+                pathname: "/confirm",
+                params: {
+                    title: "Delete Pass",
+                    message: `Are you sure you want to delete "${existingPass.name}"?`,
+                    confirmText: "Delete",
+                    action: "deletePass",
+                    returnPath: "/add/qrDisplay",
+                    returnParams: JSON.stringify({
+                        passId: existingPass.id,
+                        scannedData: existingPass.data,
+                        passName: existingPass.name,
+                    }),
+                },
+            });
+        }
+    }, [existingPass, router]);
+
+    useEffect(() => {
+        if (params.confirmed === "true" && params.action === "deletePass" && existingPass) {
+            router.setParams({ confirmed: undefined, action: undefined });
             deletePass(existingPass.id);
             router.replace("/");
         }
-    }, [existingPass, deletePass, router]);
+    }, [params.confirmed, params.action, existingPass, deletePass, router]);
 
     const handleLayout = useCallback((event: { nativeEvent: { layout: { width: number; height: number } } }) => {
         const { width, height } = event.nativeEvent.layout;
@@ -237,7 +171,7 @@ export default function QRDisplayScreen() {
             headerTitle={currentPassName}
             rightIcon={existingPass ? "delete" : undefined}
             showRightIcon={!!existingPass}
-            onRightIconPress={handleDeletePass}
+            onRightIconPress={handleDeletePress}
             onBackPress={handleSavePassAndGoHome}
             style={styles.contentContainer}
         >

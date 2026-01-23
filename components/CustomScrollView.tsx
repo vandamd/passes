@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect, forwardRef, useImperativeHandle } from "react";
 import {
     FlatList,
     View,
@@ -12,28 +12,46 @@ import { useInvertColors } from "@/contexts/InvertColorsContext";
 import { n } from "@/utils/scaling";
 
 interface CustomScrollViewProps<T = any> extends FlatListProps<T> {
-    // We can add any custom props here if needed in the future
+    onScrollableChange?: (isScrollable: boolean) => void;
 }
 
-const CustomScrollView = <T,>({
+export interface CustomScrollViewRef {
+    scrollToTop: () => void;
+}
+
+function CustomScrollViewInner<T>({
     style,
     contentContainerStyle,
+    onScrollableChange,
+    innerRef,
     ...rest
-}: CustomScrollViewProps<T>) => {
+}: CustomScrollViewProps<T> & { innerRef?: React.Ref<CustomScrollViewRef> }) {
+    const flatListRef = useRef<FlatList>(null);
+
+    useImperativeHandle(innerRef, () => ({
+        scrollToTop: () => {
+            flatListRef.current?.scrollToOffset({ offset: 0, animated: false });
+        },
+    }));
+
     const { invertColors } = useInvertColors();
     const [contentHeight, setContentHeight] = useState<number>(0);
     const [scrollViewHeight, setScrollViewHeight] = useState<number>(0);
     const scrollY = useRef(new Animated.Value(0)).current;
 
-    const scrollIndicatorHeight =
-        scrollViewHeight > 0 &&
-            contentHeight > 0 &&
-            contentHeight > scrollViewHeight
-            ? Math.max(
-                (scrollViewHeight * scrollViewHeight) / contentHeight,
-                n(20)
-            )
-            : 0;
+    const isScrollable = scrollViewHeight > 0 && contentHeight > 0 && contentHeight > scrollViewHeight;
+
+    const scrollIndicatorHeight = isScrollable
+        ? Math.max((scrollViewHeight * scrollViewHeight) / contentHeight, n(20))
+        : 0;
+
+    const prevIsScrollable = useRef<boolean | null>(null);
+    useEffect(() => {
+        if (onScrollableChange && prevIsScrollable.current !== isScrollable) {
+            prevIsScrollable.current = isScrollable;
+            onScrollableChange(isScrollable);
+        }
+    }, [isScrollable, onScrollableChange]);
 
     const scrollIndicatorPosition =
         contentHeight > scrollViewHeight && scrollIndicatorHeight > 0
@@ -59,6 +77,7 @@ const CustomScrollView = <T,>({
     return (
         <View style={styles.container}>
             <FlatList
+                ref={flatListRef}
                 style={[{ width: "100%" }, style]}
                 contentContainerStyle={[{ flexGrow: 1 }, contentContainerStyle]}
                 showsVerticalScrollIndicator={false}
@@ -111,7 +130,11 @@ const CustomScrollView = <T,>({
             )}
         </View>
     );
-};
+}
+
+const CustomScrollView = forwardRef<CustomScrollViewRef, CustomScrollViewProps>(
+    (props, ref) => <CustomScrollViewInner {...props} innerRef={ref} />
+) as <T>(props: CustomScrollViewProps<T> & { ref?: React.Ref<CustomScrollViewRef> }) => React.ReactElement;
 
 const styles = StyleSheet.create({
     container: {

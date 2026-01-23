@@ -2,6 +2,7 @@ import { useCallback } from "react";
 import ContentContainer from "@/components/ContentContainer";
 import { router } from "expo-router";
 import CustomScrollView from "@/components/CustomScrollView";
+import { CenteredMessage } from "@/components/CenteredMessage";
 import { usePasses } from "@/contexts/PassesContext";
 import { StyledButton } from "@/components/StyledButton";
 import { View, StyleSheet } from "react-native";
@@ -31,8 +32,30 @@ export default function PassesScreen() {
         [handlePassPress]
     );
 
+    if (passes.length === 0) {
+        return (
+            <ContentContainer
+                headerTitle="Passes"
+                hideBackButton
+                rightIcon="add"
+                onRightIconPress={() => router.push("/pass-name")}
+                style={styles.container}
+            >
+                <CenteredMessage message="No passes" hint="Tap + to add a pass" />
+            </ContentContainer>
+        );
+    }
+
     return (
-        <ContentContainer headerTitle="Passes" hideBackButton={true} style={styles.container}>
+        <ContentContainer
+            headerTitle="Passes"
+            hideBackButton
+            leftIcon="swap-vert"
+            onLeftIconPress={() => router.push("/reorder-passes")}
+            rightIcon="add"
+            onRightIconPress={() => router.push("/pass-name")}
+            style={styles.container}
+        >
             <CustomScrollView
                 data={passes}
                 renderItem={renderItem}

@@ -4,7 +4,6 @@ import { Navbar, TabConfigItem } from "@/components/Navbar";
 
 export const TABS_CONFIG: ReadonlyArray<TabConfigItem> = [
     { name: "Passes", screenName: "passes", iconName: "qr-code" },
-    { name: "Add", screenName: "add/name", iconName: "add-circle-outline", isExternalRoute: true },
     { name: "Scan", screenName: "scan", iconName: "camera-alt", isExternalRoute: true },
     { name: "Settings", screenName: "settings", iconName: "settings" },
 ] as const;

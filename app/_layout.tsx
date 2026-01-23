@@ -31,11 +31,10 @@ function RootNavigation() {
             }}
         >
             <Stack.Screen name="(tabs)" />
-            <Stack.Screen name="add/name" />
+            <Stack.Screen name="pass-name" />
             <Stack.Screen name="add/camera" />
             <Stack.Screen name="add/qrDisplay" />
             <Stack.Screen name="scan" />
-            <Stack.Screen name="rename" />
             <Stack.Screen name="confirm" />
         </Stack>
     );
