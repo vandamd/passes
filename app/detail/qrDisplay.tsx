@@ -14,6 +14,8 @@ import {
     getCachedBarcode,
     setCachedBarcode,
     isValidBarcodeType,
+    getPersistedBarcode,
+    persistBarcode,
 } from "@/utils/barcodeGenerator";
 
 export default function QRDisplayScreen() {
@@ -66,43 +68,66 @@ export default function QRDisplayScreen() {
     useEffect(() => {
         let cancelled = false;
 
-        if ((currentData || currentRawData) && currentType) {
-            const cacheKey = `${currentType}:${currentRawData || currentData}:${currentRawData ? "raw" : "text"}`;
-            const cached = getCachedBarcode(cacheKey);
+        const loadBarcode = async () => {
+            if (!(currentData || currentRawData) || !currentType) {
+                setBarcodeSource(null);
+                setBarcodeError(null);
+                return;
+            }
 
+            const cacheKey = `${currentType}:${currentRawData || currentData}:${currentRawData ? "raw" : "text"}`;
+
+            // L1: Check memory cache (sync)
+            const cached = getCachedBarcode(cacheKey);
             if (cached) {
                 setBarcodeSource(cached);
                 return;
             }
 
+            // L2: Check persistent cache for saved passes (async)
+            if (passId) {
+                const persisted = await getPersistedBarcode(passId);
+                if (!cancelled && persisted) {
+                    setCachedBarcode(cacheKey, persisted as Parameters<typeof setCachedBarcode>[1]);
+                    setBarcodeSource(persisted);
+                    return;
+                }
+            }
+
+            if (cancelled) return;
+
+            // Generate barcode
             const bcid = getBwipJsBcid(currentType, currentData || "");
             const options = buildBarcodeOptions(bcid, currentData || "", currentRawData);
 
             setBarcodeError(null);
 
-            generateBarcode(bcid, options)
-                .then((result) => {
-                    if (!cancelled) {
-                        setCachedBarcode(cacheKey, result);
-                        setBarcodeSource(result);
+            try {
+                const result = await generateBarcode(bcid, options);
+                if (!cancelled) {
+                    setCachedBarcode(cacheKey, result);
+                    setBarcodeSource(result);
+
+                    // Persist to L2 for saved passes
+                    if (passId) {
+                        persistBarcode(passId, result);
                     }
-                })
-                .catch((err: Error) => {
-                    if (!cancelled) {
-                        console.error("bwip-js toDataURL error:", err.message || err);
-                        setBarcodeError("Unable to render barcode. Please try again.");
-                        setBarcodeSource(null);
-                    }
-                });
-        } else {
-            setBarcodeSource(null);
-            setBarcodeError(null);
-        }
+                }
+            } catch (err) {
+                if (!cancelled) {
+                    console.error("bwip-js toDataURL error:", (err as Error).message || err);
+                    setBarcodeError("Unable to render barcode. Please try again.");
+                    setBarcodeSource(null);
+                }
+            }
+        };
+
+        loadBarcode();
 
         return () => {
             cancelled = true;
         };
-    }, [currentData, currentRawData, currentType]);
+    }, [currentData, currentRawData, currentType, passId]);
 
     const handleSavePassAndGoHome = useCallback(() => {
         if ((currentData || currentRawData) && currentPassName && !existingPass && !hasAddedPassRef.current) {

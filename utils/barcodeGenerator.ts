@@ -1,6 +1,7 @@
 import { toDataURL, type DataURL } from "@bwip-js/react-native";
 import { PixelRatio } from "react-native";
 import { BarcodeType, SUPPORTED_BARCODE_TYPES } from "@/types/pass";
+import { readFromCache, writeToCache, deleteFromCache, CachedBarcode } from "./barcodeFileCache";
 
 const BARCODE_TYPE_MAPPING: Readonly<Record<string, string>> = {
     aztec: "azteccode",
@@ -131,4 +132,39 @@ export const setCachedBarcode = (cacheKey: string, barcode: DataURL): void => {
 
 export const isValidBarcodeType = (type: string | undefined): type is BarcodeType => {
     return type !== undefined && SUPPORTED_BARCODE_TYPES.includes(type as BarcodeType);
+};
+
+export const getPersistedBarcode = async (passId: string): Promise<CachedBarcode | null> => {
+    const persisted = await readFromCache(passId);
+    if (persisted) {
+        const cacheKey = `persisted_${passId}`;
+        setCachedBarcode(cacheKey, persisted as DataURL);
+    }
+    return persisted;
+};
+
+export const persistBarcode = async (passId: string, barcode: CachedBarcode): Promise<void> => {
+    await writeToCache(passId, barcode);
+};
+
+export const deletePersistedBarcode = async (passId: string): Promise<void> => {
+    const cacheKey = `persisted_${passId}`;
+    barcodeCache.delete(cacheKey);
+    await deleteFromCache(passId);
+};
+
+export const preGenerateBarcode = async (
+    passId: string,
+    type: BarcodeType,
+    data: string,
+    rawData?: string
+): Promise<void> => {
+    try {
+        const bcid = getBwipJsBcid(type, data);
+        const options = buildBarcodeOptions(bcid, data, rawData);
+        const barcode = await generateBarcode(bcid, options);
+        await persistBarcode(passId, barcode);
+    } catch {
+        // Silent fail - barcode will be generated on demand
+    }
 };

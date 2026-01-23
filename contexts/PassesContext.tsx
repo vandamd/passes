@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect, useCallback, use
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as SecureStore from "expo-secure-store";
 import { Pass, BarcodeType, SUPPORTED_BARCODE_TYPES } from "@/types/pass";
+import { preGenerateBarcode, deletePersistedBarcode } from "@/utils/barcodeGenerator";
 
 const parseStoredPasses = (stored: string): Pass[] => {
     try {
@@ -96,10 +97,12 @@ export const PassesProvider: React.FC<{ children: ReactNode }> = ({ children }) 
             type,
         };
         setPasses((prev) => [...prev, newPass]);
+        preGenerateBarcode(newPass.id, type, data, rawData);
     }, []);
 
     const deletePass = useCallback((id: string) => {
         setPasses((prev) => prev.filter((pass) => pass.id !== id));
+        deletePersistedBarcode(id);
     }, []);
 
     const updatePassName = useCallback((id: string, newName: string) => {
