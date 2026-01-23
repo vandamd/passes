@@ -21,13 +21,14 @@ export default function QRDisplayScreen() {
     const router = useRouter();
     const params = useLocalSearchParams<{
         scannedData: string;
+        scannedRawData?: string;
         scannedType?: string;
         passName?: string;
         passId?: string;
         confirmed?: string;
         action?: string;
     }>();
-    const { scannedData, scannedType, passName, passId } = params;
+    const { scannedData, scannedRawData, scannedType, passName, passId } = params;
     const { addPass, getPassById, deletePass } = usePasses();
     const [barcodeSource, setBarcodeSource] = useState<{ uri: string; width: number; height: number } | null>(null);
     const [barcodeError, setBarcodeError] = useState<string | null>(null);
@@ -107,11 +108,11 @@ export default function QRDisplayScreen() {
             const validatedType: BarcodeType | undefined = isValidBarcodeType(scannedType) ? scannedType : undefined;
             if (validatedType) {
                 hasAddedPassRef.current = true;
-                addPass(currentPassName, currentData, validatedType);
+                addPass(currentPassName, currentData, validatedType, scannedRawData);
             }
         }
         router.replace("/");
-    }, [existingPass, scannedType, currentData, currentPassName, addPass, router]);
+    }, [existingPass, scannedType, scannedRawData, currentData, currentPassName, addPass, router]);
 
     const handleDeletePress = useCallback(() => {
         if (existingPass) {

@@ -2,6 +2,7 @@ export interface Pass {
     readonly id: string;
     readonly name: string;
     readonly data: string;
+    readonly rawData?: string;
     readonly type: BarcodeType;
 }
 

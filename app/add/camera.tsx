@@ -1,24 +1,19 @@
 import React, { useState, useCallback, useRef } from "react";
 import { View, StyleSheet, Button } from "react-native";
-import { useRouter, useLocalSearchParams } from "expo-router";
+import { useRouter } from "expo-router";
 import { StyledText } from "@/components/StyledText";
-import {
-    CameraType,
-    CameraView,
-    useCameraPermissions,
-    BarcodeScanningResult,
-} from "expo-camera";
+import { useCameraPermissions } from "expo-camera";
 import ContentContainer from "@/components/ContentContainer";
 import { useInvertColors } from "@/contexts/InvertColorsContext";
 import { n } from "@/utils/scaling";
-import { SUPPORTED_BARCODE_TYPES } from "@/types/pass";
+import { ExpoBarcodeScannerView, BarcodeResult } from "@/modules/expo-barcode-scanner";
 
 const SCAN_DEBOUNCE_MS = 500;
 
 export default function CameraScreen() {
     const router = useRouter();
     const { invertColors } = useInvertColors();
-    const [facing, setFacing] = useState<CameraType>("back");
+    const [facing, setFacing] = useState<"front" | "back">("back");
     const [permission, requestPermission] = useCameraPermissions();
     const lastScanRef = useRef<number>(0);
 
@@ -27,19 +22,19 @@ export default function CameraScreen() {
     }, []);
 
     const handleBarcodeScanned = useCallback(
-        (scanningResult: BarcodeScanningResult) => {
+        (event: { nativeEvent: BarcodeResult }) => {
             const now = Date.now();
             if (now - lastScanRef.current < SCAN_DEBOUNCE_MS) {
                 return;
             }
             lastScanRef.current = now;
 
-            const data = scanningResult.data;
-            const type = scanningResult.type;
+            const { data, rawData, type } = event.nativeEvent;
             router.push({
                 pathname: "/pass-name",
                 params: {
                     scannedData: data,
+                    scannedRawData: rawData,
                     scannedType: type,
                 },
             });
@@ -72,14 +67,13 @@ export default function CameraScreen() {
             onRightIconPress={handleSwapCamera}
             style={styles.contentContainer}
         >
-            <CameraView
-                style={styles.camera}
-                facing={facing}
-                onBarcodeScanned={handleBarcodeScanned}
-                barcodeScannerSettings={{
-                    barcodeTypes: [...SUPPORTED_BARCODE_TYPES],
-                }}
-            />
+            <View style={styles.cameraContainer}>
+                <ExpoBarcodeScannerView
+                    style={styles.camera}
+                    facing={facing}
+                    onBarcodeScanned={handleBarcodeScanned}
+                />
+            </View>
         </ContentContainer>
     );
 }
@@ -96,10 +90,15 @@ const styles = StyleSheet.create({
     },
     contentContainer: {
         paddingHorizontal: 0,
+        paddingTop: 0,
         gap: 0,
     },
+    cameraContainer: {
+        flex: 1,
+        alignSelf: "stretch",
+        overflow: "hidden",
+    },
     camera: {
-        height: "100%",
-        width: "100%",
+        flex: 1,
     },
 });

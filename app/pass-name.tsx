@@ -16,11 +16,12 @@ export default function PassNameScreen() {
     const [passName, setPassName] = useState("");
     const router = useRouter();
 
-    const { mode, passId, currentName, scannedData, scannedType } = useLocalSearchParams<{
+    const { mode, passId, currentName, scannedData, scannedRawData, scannedType } = useLocalSearchParams<{
         mode?: "create" | "rename";
         passId?: string;
         currentName?: string;
         scannedData?: string;
+        scannedRawData?: string;
         scannedType?: string;
     }>();
 
@@ -42,12 +43,13 @@ export default function PassNameScreen() {
                 pathname: "/detail/qrDisplay",
                 params: {
                     scannedData,
+                    scannedRawData,
                     scannedType,
                     passName: passName.trim(),
                 },
             });
         }
-    }, [isRenameMode, passId, passName, updatePassName, router, scannedData, scannedType]);
+    }, [isRenameMode, passId, passName, updatePassName, router, scannedData, scannedRawData, scannedType]);
 
     const handleClear = useCallback(() => {
         setPassName("");
