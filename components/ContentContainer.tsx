@@ -12,6 +12,7 @@ interface ContentContainerProps {
     rightIcon?: keyof typeof MaterialIcons.glyphMap;
     showRightIcon?: boolean;
     onRightIconPress?: () => void;
+    onBackPress?: () => void;
     style?: StyleProp<ViewStyle>;
 }
 
@@ -22,6 +23,7 @@ export default function ContentContainer({
     rightIcon,
     showRightIcon = true,
     onRightIconPress,
+    onBackPress,
     style,
 }: ContentContainerProps) {
     const { invertColors } = useInvertColors();
@@ -36,8 +38,10 @@ export default function ContentContainer({
                 <Header
                     headerTitle={headerTitle}
                     hideBackButton={hideBackButton}
-                    rightIcon={showRightIcon ? rightIcon : undefined}
+                    rightIcon={rightIcon}
+                    showRightIcon={showRightIcon}
                     onRightIconPress={onRightIconPress}
+                    onBackPress={onBackPress}
                 />
             )}
             <View style={[styles.content, style]}>{children ?? null}</View>

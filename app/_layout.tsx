@@ -7,11 +7,10 @@ import {
     InvertColorsProvider,
     useInvertColors,
 } from "@/contexts/InvertColorsContext";
-import { DisplayModeProvider } from "@/contexts/DisplayModeContext";
+import { PassesProvider } from "@/contexts/PassesContext";
 import * as SystemUI from "expo-system-ui";
-import * as NavigationBar from 'expo-navigation-bar';
-import * as SplashScreen from 'expo-splash-screen';
-
+import * as NavigationBar from "expo-navigation-bar";
+import * as SplashScreen from "expo-splash-screen";
 
 function RootNavigation() {
     const { invertColors } = useInvertColors();
@@ -32,9 +31,11 @@ function RootNavigation() {
             }}
         >
             <Stack.Screen name="(tabs)" />
-            <Stack.Screen name="settings/customise" />
-            <Stack.Screen name="settings/customise-interface" />
-            <Stack.Screen name="settings/display-mode" />
+            <Stack.Screen name="add/name" />
+            <Stack.Screen name="add/camera" />
+            <Stack.Screen name="add/qrDisplay" />
+            <Stack.Screen name="scan" />
+            <Stack.Screen name="rename" />
             <Stack.Screen name="confirm" />
         </Stack>
     );
@@ -61,11 +62,11 @@ export default function RootLayout() {
 
     return (
         <InvertColorsProvider>
-            <DisplayModeProvider>
-                <HapticProvider>
+            <HapticProvider>
+                <PassesProvider>
                     <RootNavigation />
-                </HapticProvider>
-            </DisplayModeProvider>
+                </PassesProvider>
+            </HapticProvider>
         </InvertColorsProvider>
     );
 }

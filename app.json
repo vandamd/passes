@@ -1,27 +1,37 @@
 {
   "expo": {
-    "name": "appname",
-    "slug": "appname",
-    "version": "1.0.0",
+    "name": "Passes",
+    "slug": "passes",
+    "version": "2.2.3",
     "orientation": "portrait",
-    "scheme": "appname",
+    "scheme": "passes",
     "newArchEnabled": true,
     "icon": "./assets/images/icon.png",
     "android": {
       "backgroundColor": "#000000",
-      "package": "com.vandam.appname"
+      "package": "com.vandamd.passes"
     },
     "plugins": [
       "expo-router",
       "expo-font",
       "./plugins/withAndroidConfigChanges",
-      "./plugins/withAndroidTheme"
+      "./plugins/withAndroidTheme",
+      "expo-secure-store",
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow Passes to scan barcodes"
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true
     },
     "extra": {
-      "router": {}
+      "router": {},
+      "eas": {
+        "projectId": "f0513931-307a-42e4-856f-fc0a10e9c922"
+      }
     }
   }
 }

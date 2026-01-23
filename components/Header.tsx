@@ -15,6 +15,7 @@ interface HeaderProps {
     onLeftIconPress?: () => void;
     rightIcon?: keyof typeof MaterialIcons.glyphMap;
     onRightIconPress?: () => void;
+    showRightIcon?: boolean;
 }
 
 export function Header({
@@ -25,6 +26,7 @@ export function Header({
     onLeftIconPress,
     rightIcon,
     onRightIconPress,
+    showRightIcon = true,
 }: HeaderProps) {
     const { invertColors } = useInvertColors();
     const iconColor = invertColors ? "black" : "white";
@@ -66,7 +68,7 @@ export function Header({
     };
 
     const renderRightButton = () => {
-        if (rightIcon) {
+        if (rightIcon && showRightIcon) {
             return (
                 <HapticPressable onPress={onRightIconPress}>
                     <View style={styles.button}>
