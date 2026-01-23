@@ -14,7 +14,7 @@ export default function PassesScreen() {
 
     const handlePassPress = useCallback((pass: Pass) => {
         router.push({
-            pathname: "/add/qrDisplay",
+            pathname: "/detail/qrDisplay",
             params: {
                 passId: pass.id,
                 scannedData: pass.data,

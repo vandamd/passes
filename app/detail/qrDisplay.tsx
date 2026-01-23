@@ -122,7 +122,7 @@ export default function QRDisplayScreen() {
                     message: `Are you sure you want to delete "${existingPass.name}"?`,
                     confirmText: "Delete",
                     action: "deletePass",
-                    returnPath: "/add/qrDisplay",
+                    returnPath: "/detail/qrDisplay",
                     returnParams: JSON.stringify({
                         passId: existingPass.id,
                         scannedData: existingPass.data,
