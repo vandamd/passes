@@ -71,5 +71,6 @@ const styles = StyleSheet.create({
     },
     passItem: {
         marginBottom: n(15),
+        marginRight: n(10),
     },
 });
