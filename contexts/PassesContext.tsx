@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useMemo, ReactNode } from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as SecureStore from "expo-secure-store";
 import { Pass, BarcodeType, SUPPORTED_BARCODE_TYPES } from "@/types/pass";
 
@@ -34,6 +35,7 @@ interface PassesContextType {
 }
 
 const PASSES_STORAGE_KEY = "userPasses_v1";
+const SECURE_STORE_MIGRATED_KEY = "secureStoreMigrated";
 
 const PassesContext = createContext<PassesContextType | undefined>(undefined);
 
@@ -44,17 +46,38 @@ export const PassesProvider: React.FC<{ children: ReactNode }> = ({ children }) 
     useEffect(() => {
         let cancelled = false;
 
-        SecureStore.getItemAsync(PASSES_STORAGE_KEY)
-            .then((stored) => {
+        const loadPasses = async () => {
+            try {
+                // Check if we've already migrated from SecureStore
+                const migrated = await AsyncStorage.getItem(SECURE_STORE_MIGRATED_KEY);
+
+                if (!migrated) {
+                    // Try to migrate data from SecureStore (for existing users)
+                    const secureStoreData = await SecureStore.getItemAsync(PASSES_STORAGE_KEY);
+                    if (secureStoreData) {
+                        // Move data to AsyncStorage
+                        await AsyncStorage.setItem(PASSES_STORAGE_KEY, secureStoreData);
+                        // Clean up SecureStore
+                        await SecureStore.deleteItemAsync(PASSES_STORAGE_KEY);
+                    }
+                    // Mark migration as complete
+                    await AsyncStorage.setItem(SECURE_STORE_MIGRATED_KEY, "true");
+                }
+
+                // Load from AsyncStorage
+                const stored = await AsyncStorage.getItem(PASSES_STORAGE_KEY);
                 if (cancelled) return;
                 if (stored) {
                     setPasses(parseStoredPasses(stored));
                 }
-                setIsHydrated(true);
-            })
-            .catch(() => {
+            } catch {
+                // Ignore errors
+            } finally {
                 if (!cancelled) setIsHydrated(true);
-            });
+            }
+        };
+
+        loadPasses();
 
         return () => {
             cancelled = true;
@@ -65,7 +88,7 @@ export const PassesProvider: React.FC<{ children: ReactNode }> = ({ children }) 
         if (!isHydrated) return;
 
         const timeoutId = setTimeout(() => {
-            SecureStore.setItemAsync(PASSES_STORAGE_KEY, JSON.stringify(passes));
+            AsyncStorage.setItem(PASSES_STORAGE_KEY, JSON.stringify(passes));
         }, 300);
 
         return () => clearTimeout(timeoutId);
