@@ -38,7 +38,7 @@ export default function PassesScreen() {
                 headerTitle="Passes"
                 hideBackButton
                 rightIcon="add"
-                onRightIconPress={() => router.push("/pass-name")}
+                onRightIconPress={() => router.push("/add/camera")}
                 style={styles.container}
             >
                 <CenteredMessage message="No passes" hint="Tap + to add a pass" />
@@ -53,7 +53,7 @@ export default function PassesScreen() {
             leftIcon="swap-vert"
             onLeftIconPress={() => router.push("/reorder-passes")}
             rightIcon="add"
-            onRightIconPress={() => router.push("/pass-name")}
+            onRightIconPress={() => router.push("/add/camera")}
             style={styles.container}
         >
             <CustomScrollView

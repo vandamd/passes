@@ -16,10 +16,12 @@ export default function PassNameScreen() {
     const [passName, setPassName] = useState("");
     const router = useRouter();
 
-    const { mode, passId, currentName } = useLocalSearchParams<{
+    const { mode, passId, currentName, scannedData, scannedType } = useLocalSearchParams<{
         mode?: "create" | "rename";
         passId?: string;
         currentName?: string;
+        scannedData?: string;
+        scannedType?: string;
     }>();
 
     const isRenameMode = mode === "rename";
@@ -35,10 +37,17 @@ export default function PassNameScreen() {
         if (isRenameMode && passId && passName.trim()) {
             updatePassName(passId, passName.trim());
             router.back();
-        } else if (!isRenameMode) {
-            router.push({ pathname: "/add/camera", params: { passName } });
+        } else if (!isRenameMode && scannedData && scannedType) {
+            router.push({
+                pathname: "/add/qrDisplay",
+                params: {
+                    scannedData,
+                    scannedType,
+                    passName: passName.trim(),
+                },
+            });
         }
-    }, [isRenameMode, passId, passName, updatePassName, router]);
+    }, [isRenameMode, passId, passName, updatePassName, router, scannedData, scannedType]);
 
     const handleClear = useCallback(() => {
         setPassName("");

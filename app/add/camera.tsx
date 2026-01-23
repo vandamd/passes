@@ -17,7 +17,6 @@ const SCAN_DEBOUNCE_MS = 500;
 
 export default function CameraScreen() {
     const router = useRouter();
-    const { passName } = useLocalSearchParams<{ passName?: string }>();
     const { invertColors } = useInvertColors();
     const [facing, setFacing] = useState<CameraType>("back");
     const [permission, requestPermission] = useCameraPermissions();
@@ -38,15 +37,14 @@ export default function CameraScreen() {
             const data = scanningResult.data;
             const type = scanningResult.type;
             router.push({
-                pathname: "/add/qrDisplay",
+                pathname: "/pass-name",
                 params: {
                     scannedData: data,
                     scannedType: type,
-                    passName: passName || "",
                 },
             });
         },
-        [router, passName]
+        [router]
     );
 
     if (!permission) {
