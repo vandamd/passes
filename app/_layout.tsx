@@ -11,6 +11,7 @@ import { PassesProvider } from "@/contexts/PassesContext";
 import * as SystemUI from "expo-system-ui";
 import * as NavigationBar from "expo-navigation-bar";
 import * as SplashScreen from "expo-splash-screen";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 function RootNavigation() {
     const { invertColors } = useInvertColors();
@@ -60,12 +61,14 @@ export default function RootLayout() {
     }
 
     return (
-        <InvertColorsProvider>
-            <HapticProvider>
-                <PassesProvider>
-                    <RootNavigation />
-                </PassesProvider>
-            </HapticProvider>
-        </InvertColorsProvider>
+        <GestureHandlerRootView style={{ flex: 1 }}>
+            <InvertColorsProvider>
+                <HapticProvider>
+                    <PassesProvider>
+                        <RootNavigation />
+                    </PassesProvider>
+                </HapticProvider>
+            </InvertColorsProvider>
+        </GestureHandlerRootView>
     );
 }

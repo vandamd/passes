@@ -1,6 +1,8 @@
-import React, { ReactNode } from "react";
+import React, { ReactNode, useCallback } from "react";
 import { View, StyleSheet, StyleProp, ViewStyle } from "react-native";
+import { router } from "expo-router";
 import { Header } from "@/components/Header";
+import { SwipeBackContainer } from "@/components/SwipeBackContainer";
 import { useInvertColors } from "@/contexts/InvertColorsContext";
 import { MaterialIcons } from "@expo/vector-icons";
 import { n } from "@/utils/scaling";
@@ -10,13 +12,16 @@ interface ContentContainerProps {
     children?: ReactNode;
     hideBackButton?: boolean;
     leftIcon?: keyof typeof MaterialIcons.glyphMap;
+    leftIconSize?: number;
     onLeftIconPress?: () => void;
     rightIcon?: keyof typeof MaterialIcons.glyphMap;
-    showRightIcon?: boolean;
     onRightIconPress?: () => void;
-    onBackPress?: () => void;
-    onTitlePress?: () => void;
+    rightIconShowLength?: number;
     style?: StyleProp<ViewStyle>;
+    backgroundColor?: string;
+    headerIconColor?: string;
+    onTitlePress?: () => void;
+    onBackPress?: () => void;
 }
 
 export default function ContentContainer({
@@ -24,37 +29,60 @@ export default function ContentContainer({
     children,
     hideBackButton = false,
     leftIcon,
+    leftIconSize,
     onLeftIconPress,
     rightIcon,
-    showRightIcon = true,
     onRightIconPress,
-    onBackPress,
-    onTitlePress,
+    rightIconShowLength = 1,
     style,
+    backgroundColor,
+    headerIconColor,
+    onTitlePress,
+    onBackPress,
 }: ContentContainerProps) {
     const { invertColors } = useInvertColors();
+    const defaultBgColor = invertColors ? "white" : "black";
+    const bgColor = backgroundColor ?? defaultBgColor;
+    const canSwipeBack = Boolean(headerTitle) && !hideBackButton;
+
+    const handleBack = useCallback(() => {
+        if (onBackPress) {
+            onBackPress();
+            return;
+        }
+
+        if (router.canGoBack()) {
+            router.back();
+        }
+    }, [onBackPress]);
+
     return (
-        <View
-            style={[
-                styles.container,
-                { backgroundColor: invertColors ? "white" : "black" },
-            ]}
-        >
-            {headerTitle && (
-                <Header
-                    headerTitle={headerTitle}
-                    hideBackButton={hideBackButton}
-                    leftIcon={leftIcon}
-                    onLeftIconPress={onLeftIconPress}
-                    rightIcon={rightIcon}
-                    showRightIcon={showRightIcon}
-                    onRightIconPress={onRightIconPress}
-                    onBackPress={onBackPress}
-                    onTitlePress={onTitlePress}
-                />
-            )}
-            <View style={[styles.content, style]}>{children ?? null}</View>
-        </View>
+        <SwipeBackContainer enabled={canSwipeBack} onSwipeBack={handleBack}>
+            <View
+                style={[
+                    styles.container,
+                    { backgroundColor: bgColor },
+                ]}
+            >
+                {headerTitle && (
+                    <Header
+                        headerTitle={headerTitle}
+                        hideBackButton={hideBackButton}
+                        backEvent={handleBack}
+                        leftIcon={leftIcon}
+                        leftIconSize={leftIconSize}
+                        onLeftIconPress={onLeftIconPress}
+                        rightIcon={rightIcon}
+                        onRightIconPress={onRightIconPress}
+                        rightIconShowLength={rightIconShowLength}
+                        backgroundColor={backgroundColor}
+                        iconColor={headerIconColor}
+                        onTitlePress={onTitlePress}
+                    />
+                )}
+                <View style={[styles.content, style]}>{children ?? null}</View>
+            </View>
+        </SwipeBackContainer>
     );
 }
 
@@ -72,3 +100,4 @@ const styles = StyleSheet.create({
         gap: n(47),
     },
 });
+

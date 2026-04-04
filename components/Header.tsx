@@ -10,30 +10,39 @@ import { n } from "@/utils/scaling";
 interface HeaderProps {
     headerTitle?: string;
     hideBackButton?: boolean;
-    onBackPress?: () => void;
+    backEvent?: () => void;
     leftIcon?: keyof typeof MaterialIcons.glyphMap;
+    leftIconSize?: number;
     onLeftIconPress?: () => void;
     rightIcon?: keyof typeof MaterialIcons.glyphMap;
     onRightIconPress?: () => void;
-    showRightIcon?: boolean;
+    rightIconShowLength?: number;
+    backgroundColor?: string;
+    iconColor?: string;
     onTitlePress?: () => void;
 }
 
 export function Header({
     headerTitle,
     hideBackButton = false,
-    onBackPress,
+    backEvent,
     leftIcon,
+    leftIconSize = 28,
     onLeftIconPress,
     rightIcon,
     onRightIconPress,
-    showRightIcon = true,
+    rightIconShowLength = 1,
+    backgroundColor,
+    iconColor: iconColorProp,
     onTitlePress,
 }: HeaderProps) {
     const { invertColors } = useInvertColors();
-    const iconColor = invertColors ? "black" : "white";
+    const defaultIconColor = invertColors ? "black" : "white";
+    const iconColor = iconColorProp ?? defaultIconColor;
+    const defaultBgColor = invertColors ? "white" : "black";
+    const bgColor = backgroundColor ?? defaultBgColor;
 
-    const handleBack = onBackPress ?? (() => {
+    const handleBack = backEvent ?? (() => {
         if (router.canGoBack()) {
             router.back();
         }
@@ -59,7 +68,7 @@ export function Header({
                     <View style={styles.button}>
                         <MaterialIcons
                             name={leftIcon}
-                            size={n(28)}
+                            size={n(leftIconSize)}
                             color={iconColor}
                         />
                     </View>
@@ -70,7 +79,7 @@ export function Header({
     };
 
     const renderRightButton = () => {
-        if (rightIcon && showRightIcon) {
+        if (rightIcon && rightIconShowLength > 0) {
             return (
                 <HapticPressable onPress={onRightIconPress}>
                     <View style={styles.button}>
@@ -86,27 +95,32 @@ export function Header({
         return <View style={styles.button} />;
     };
 
+    const renderTitle = () => {
+        const titleElement = (
+            <StyledText style={styles.title} numberOfLines={1}>
+                {headerTitle}
+            </StyledText>
+        );
+
+        if (onTitlePress) {
+            return (
+                <HapticPressable onPress={onTitlePress} style={styles.titleWrapper}>
+                    {titleElement}
+                </HapticPressable>
+            );
+        }
+        return <View style={styles.titleWrapper}>{titleElement}</View>;
+    };
+
     return (
         <View
             style={[
                 styles.header,
-                { backgroundColor: invertColors ? "white" : "black" },
+                { backgroundColor: bgColor },
             ]}
         >
             {renderLeftButton()}
-            <View style={styles.titleContainer}>
-                {onTitlePress ? (
-                    <HapticPressable onPress={onTitlePress}>
-                        <StyledText style={styles.title} numberOfLines={1}>
-                            {headerTitle}
-                        </StyledText>
-                    </HapticPressable>
-                ) : (
-                    <StyledText style={styles.title} numberOfLines={1}>
-                        {headerTitle}
-                    </StyledText>
-                )}
-            </View>
+            {renderTitle()}
             {renderRightButton()}
         </View>
     );
@@ -121,16 +135,15 @@ const styles = StyleSheet.create({
         paddingVertical: n(5),
         zIndex: 1,
     },
+    titleWrapper: {
+        flex: 1,
+        alignItems: "center",
+    },
     title: {
         fontSize: n(20),
         fontFamily: "PublicSans-Regular",
         paddingTop: n(2),
-        maxWidth: "75%",
-    },
-    titleContainer: {
-        flex: 1,
-        alignItems: "center",
-        justifyContent: "center",
+        maxWidth: "100%",
     },
     button: {
         width: n(32),
@@ -140,3 +153,4 @@ const styles = StyleSheet.create({
         paddingRight: n(4),
     },
 });
+
